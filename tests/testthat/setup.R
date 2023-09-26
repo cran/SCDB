@@ -1,3 +1,7 @@
+# dplyr has a deprecated function called "id" that in some cases are called over the SCDB implementation if "id"
+# We here explicitly prefer our implementation for our tests
+conflicted::conflict_prefer("id", "SCDB")
+
 # Define list of connections to check
 conn_list <- list(
   # Backend string = package::function
@@ -12,7 +16,7 @@ get_driver <- function(x = character(), ...) {
 
   # Skip unavailable packages
   if (!requireNamespace(parts[1], quietly = TRUE)) {
-    return(NULL)
+    return()
   }
 
   drv <- getExportedValue(parts[1], parts[2])

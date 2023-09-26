@@ -2,6 +2,30 @@ test_that("get_connection() works", {
   for (conn in conns) expect_true(DBI::dbIsValid(conn))
 })
 
+test_that("get_connection notifies if connection fails", {
+  for (i in 1:100) {
+    random_string <- paste(sample(letters, size = 32, replace = TRUE), collapse = "")
+
+    if (dir.exists(random_string)) next
+
+    expect_error(get_connection(drv = RSQLite::SQLite(), dbname = paste0(random_string, "/invalid_path")),
+                 regexp = "Could not connect to database:\nunable to open database file")
+  }
+})
+
+test_that("get_connection warns about unsupported backend", {
+  tryCatch(get_connection(drv = character(0)),
+           error = function(e) {
+             expect_error(e, regexp = paste("unable to find an inherited method for function",
+                                            "'dbCanConnect' for signature '\"character\"'"))
+           },
+           warning = function(w) {
+             # Somehow expect_warning does not match the correctly with regex. Even though expect_error does above...
+             checkmate::expect_character(w$message,
+                                         pattern = "Driver of class 'character' is currently not fully supported")
+           })
+})
+
 
 test_that("id() works", { for (conn in conns) { # nolint: brace_linter
 

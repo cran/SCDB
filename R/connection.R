@@ -23,11 +23,14 @@
 #'  Additional parameters sent to DBI::dbConnect()
 #' @return
 #'   An object that inherits from DBIConnection driver specified in drv
-#' @examples
-#' \dontrun{
-#' close_connection(conn)
-#' }
+#' @examplesIf requireNamespace("RSQLite", quietly = TRUE)
+#' conn <- get_connection(drv = RSQLite::SQLite(), dbname = ":memory:")
 #'
+#' DBI::dbIsValid(conn) # TRUE
+#'
+#' close_connection(conn)
+#'
+#' DBI::dbIsValid(conn) # FALSE
 #' @seealso [RPostgres::Postgres]
 #' @export
 get_connection <- function(drv = RPostgres::Postgres(),
@@ -49,6 +52,15 @@ get_connection <- function(drv = RPostgres::Postgres(),
   checkmate::assert_character(timezone, null.ok = TRUE)
   checkmate::assert_character(timezone_out, null.ok = TRUE)
 
+  .supported_drivers <- c(
+    "PqDriver",
+    "SQLiteDriver"
+  )
+
+  if (!class(drv) %in% .supported_drivers) {
+    warning("Driver of class '", class(drv), "' is currently not fully supported and SCDB may not perform as expected.")
+  }
+
   # Set PostgreSQL-specific options
   if (inherits(drv, "PqDriver")) {
     if (is.null(timezone)) timezone <- Sys.timezone()
@@ -59,8 +71,12 @@ get_connection <- function(drv = RPostgres::Postgres(),
   if (inherits(drv, "SQLiteDriver") && is.null(dbname)) dbname <- ""
 
   # Check if connection can be established given these settings
-  can_connect <- DBI::dbCanConnect(drv = drv, ...)
-  if (!can_connect) stop("Could not connect to database with the given parameters: ", attr(can_connect, "reason"))
+  tryCatch({
+    args <- append(list(...), as.list(environment()))
+    status <- do.call(DBI::dbCanConnect, args = args)
+
+    if (!status) rlang::abort(attr(status, "reason"))
+  })
 
   conn <- DBI::dbConnect(drv = drv,
                          dbname = dbname,
@@ -129,5 +145,5 @@ id <- function(db_table_id, conn = NULL) {
     db_table <- db_table_id
   }
 
-  DBI::Id(schema = db_schema, table = db_table)
+  return(DBI::Id(schema = db_schema, table = db_table))
 }

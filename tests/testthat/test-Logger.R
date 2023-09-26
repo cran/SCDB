@@ -4,15 +4,9 @@ test_that("Logger works", { for (conn in conns) { # nolint: brace_linter
   db_tablestring <- "test.SCDB_logger"
   ts <- "2022-01-01 09:00:00"
 
-  # Logger cannot work without these set
-  expect_error(Logger$new(), regexp = "'db_tablestring': Must be of type 'character'")
-  expect_error(Logger$new(ts = ts), regexp = "'db_tablestring': Must be of type 'character'")
-  expect_error(Logger$new(db_tablestring = db_tablestring), regexp = "not 'NULL'")
-
-
   # minimal logger
   expect_warning(
-    logger <- Logger$new(db_tablestring = db_tablestring, ts = ts, log_table_id = NULL, log_path = NULL),
+    logger <- Logger$new(log_table_id = NULL, log_path = NULL),
     regexp = "NO LOGGING WILL BE DONE"
   )
   expect_null(logger$log_path)
@@ -74,7 +68,6 @@ test_that("Logger works", { for (conn in conns) { # nolint: brace_linter
                        log_conn = conn,
                        warn = FALSE)
   log_table_id <- dplyr::tbl(conn, id("test.SCDB_logs", conn))
-  expect_null(logger$log_path)
   expect_equal(logger$log_tbl, log_table_id)
   logger$log_to_db(n_insertions = 42)
   expect_equal(nrow(log_table_id), 1)
@@ -134,15 +127,71 @@ test_that("Logger stops if file exists", { for (conn in conns) { # nolint: brace
 
   utils::capture.output(logger$log_info("test message"))
 
+  logger2 <- Logger$new(
+    db_tablestring = db_tablestring,
+    ts = ts,
+    start_time = ts,
+    log_table_id = NULL,
+    log_path = log_path
+  )
+
   expect_error(
-    logger2 <- Logger$new(
-      db_tablestring = db_tablestring,
-      ts = ts,
-      start_time = ts,
-      log_table_id = NULL,
-      log_path = log_path
-    )
+    logger2$log_info("test message")
   )
 
   file.remove(file.path(log_path, logger$log_filename))
 }})
+
+test_that("Logger console output may be suppressed", {
+  db_tablestring <- "test.SCDB_logger"
+  ts <- Sys.time()
+  log_path <- tempdir()
+
+  # First test cases with output_to_console == FALSE
+  # Here, only print when explicitly stated
+  logger <- Logger$new(
+    db_tablestring = db_tablestring,
+    ts = ts,
+    log_table_id = NULL,
+    log_path = log_path,
+    output_to_console = FALSE
+  )
+
+  # In lieu of testthat::expect_no_output...
+  expect_identical(
+    utils::capture.output(logger$log_info("Whoops! This should not have been printed!"), type = "output"),
+    character(0)
+  )
+  expect_identical(
+    utils::capture.output(logger$log_info("Whoops! This should not have been printed either!",
+                                          output_to_console = FALSE),
+                          type = "output"),
+    character(0)
+  )
+
+  expect_output(
+    logger$log_info("This line should be printed",
+                    output_to_console = TRUE),
+    regex = "This line should be printed$"
+  )
+
+  # ...and now, only suppress printing when explicitly stated
+  logger$output_to_console <- TRUE
+
+  expect_output(
+    logger$log_info("This line should be printed"),
+    regex = "This line should be printed$"
+  )
+  expect_output(
+    logger$log_info("This line should also be printed",
+                    output_to_console = TRUE),
+    regex = "This line should also be printed$"
+  )
+
+  expect_identical(
+    utils::capture.output(logger$log_info("Whoops! This should not have been printed at all!",
+                                          output_to_console = FALSE),
+                          type = "output"),
+    character(0)
+  )
+})

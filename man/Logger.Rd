@@ -19,13 +19,25 @@ logger <- Logger$new(db_tablestring = "test.table",
 \item{\code{log_path}}{(\code{character(1)})\cr
 A directory where log file is written (if this is not NULL). Defaults to \code{getOption("SCDB.log_path")}.}
 
-\item{\code{log_filename}}{(\code{character(1)})\cr
-The name (basename) of the log file.}
-
 \item{\code{log_tbl}}{The DB table used for logging. Class is connection-specific, but inherits from \code{tbl_dbi}.}
 
 \item{\code{start_time}}{(\code{POSIXct(1)})\cr
 The time at which data processing was started.}
+
+\item{\code{output_to_console}}{(\code{logical(1)})\cr
+Should the Logger output to console?
+This can always be overridden by Logger$log_info(..., output_to_console = FALSE).}
+}
+\if{html}{\out{</div>}}
+}
+\section{Active bindings}{
+\if{html}{\out{<div class="r6-active-bindings">}}
+\describe{
+\item{\code{log_filename}}{\code{character(1)}\cr
+The filename (basename) of the file that the \code{Logger} instance will output to}
+
+\item{\code{log_realpath}}{\code{character(1)}\cr
+The full path to the logger's log file.}
 }
 \if{html}{\out{</div>}}
 }
@@ -51,6 +63,7 @@ Create a new Logger object
   log_table_id = getOption("SCDB.log_table_id"),
   log_conn = NULL,
   log_path = getOption("SCDB.log_path"),
+  output_to_console = TRUE,
   warn = TRUE,
   ts = NULL,
   start_time = Sys.time()
@@ -69,6 +82,8 @@ Create a new Logger object
 \item{\code{log_path}}{The path where logs are stored.
 If NULL, no file logs are created.}
 
+\item{\code{output_to_console}}{Should the Logger output to console (TRUE/FALSE)?}
+
 \item{\code{warn}}{Show a warning if neither log_table_id or log_path could be determined}
 
 \item{\code{ts}}{A timestamp describing the data being processed (not the current time)}
@@ -84,7 +99,12 @@ If NULL, no file logs are created.}
 \subsection{Method \code{log_info()}}{
 Write a line to log file
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{Logger$log_info(..., tic = Sys.time(), log_type = "INFO")}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{Logger$log_info(
+  ...,
+  tic = Sys.time(),
+  output_to_console = self$output_to_console,
+  log_type = "INFO"
+)}\if{html}{\out{</div>}}
 }
 
 \subsection{Arguments}{
@@ -93,6 +113,8 @@ Write a line to log file
 \item{\code{...}}{One or more character strings to be concatenated}
 
 \item{\code{tic}}{The timestamp used by the log entry (default Sys.time())}
+
+\item{\code{output_to_console}}{Should the line be written to console?}
 
 \item{\code{log_type}}{A character string which describes the severity of the log message}
 }
