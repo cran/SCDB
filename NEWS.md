@@ -1,3 +1,19 @@
+# SCDB 0.2.1
+
+## Minor Improvements and Fixes
+
+* SQLite connections now support schemata similar to other backends (@marcusmunch, #67).
+
+* The package logo has been slightly altered to have a readable clock (@RasmusSkytte, #49).
+
+* Added a vignette describing the concept of a slowly changing dimension using examples (@marcusmunch, #53).
+
+* Added a `Logger$finalize` method, which removes the `log_file` in the DB when not writing to a file (@marcusmunch, #66).
+
+## Other news
+
+* Maintainer changed to Marcus Munch Grünewald @marcusmunch (@RasmusSkytte, #59)
+
 # SCDB 0.2
 
 ## Breaking changes

@@ -1,4 +1,4 @@
-test_that("Code contains no non-ASCII characters", {
+test_field_in_documentation <- function(field) {
 
   # Load .Rd files based on environment
   # When using R-CMD-Check the deployment is different from when using devtools::test().
@@ -27,7 +27,7 @@ test_that("Code contains no non-ASCII characters", {
 
   } else if (checkmate::test_directory_exists(man_dir)) {
 
-    rd_paths <- dir(man_dir, pattern = "[.][Rr][Dd]$", full.names = TRUE)
+    rd_paths <- purrr::keep(dir(man_dir, full.names = TRUE), ~ stringr::str_detect(., ".[Rr][Dd]$"))
     rd_files <- purrr::map(rd_paths, readLines)
     names(rd_files) <- purrr::map_chr(rd_paths, basename)
 
@@ -37,40 +37,23 @@ test_that("Code contains no non-ASCII characters", {
 
   }
 
+
   # Skip the "*-package.Rd" file
   rd_files <- rd_files[!stringr::str_detect(names(rd_files), "-package.[Rr][Dd]$")]
 
-  r_dir <- file.path(pkg_path, "R")
-
-  if (checkmate::test_directory_exists(r_dir)) {
-
-    r_paths <- purrr::keep(dir(r_dir, full.names = TRUE), ~ stringr::str_detect(., ".[Rr]$"))
-    r_files <- purrr::map(r_paths, readLines)
-    names(r_paths) <- purrr::map_chr(r_paths, basename)
-
-  } else {
-
-    stop(".R files could not be located")
-
+  # Check renaming
+  for (rd_id in seq_along(rd_files)) {
+    has_field <- any(stringr::str_detect(rd_files[[rd_id]], paste0(r"{\\}", field)))
+    testthat::expect_true(has_field, label = paste("File:", names(rd_files)[[rd_id]]))
   }
+}
 
-  files_to_check <- c(r_files, rd_files)
 
-  # Check the files
-  for (file_id in seq_along(files_to_check)) {
-    non_ascii_line <- stringr::str_detect(files_to_check[[file_id]], r"{[^\x00-\x7f]}")
+test_that(r"{.Rd files have \examples}", {
+  test_field_in_documentation("example")
+})
 
-    if (any(non_ascii_line)) {
-      rel_path <- stringr::str_remove(c(r_paths, rd_paths)[file_id], paste0(pkg_path, "/?"))
-      n_lines <- which(non_ascii_line)
 
-      msg <- sprintf("Non-ASCII character(s) in file %s line(s) %s",
-                     rel_path,
-                     paste(n_lines, collapse = ", "))
-
-      fail(msg)
-    } else {
-      succeed()
-    }
-  }
+test_that(r"{.Rd files have \value}", {
+  test_field_in_documentation("value")
 })
