@@ -21,6 +21,7 @@
 #'   Sets the timezone_out of DBI::dbConnect()
 #' @param ...
 #'  Additional parameters sent to DBI::dbConnect()
+#' @inheritParams RPostgres::dbConnect_PqDriver
 #' @return
 #'   An object that inherits from DBIConnection driver specified in drv
 #' @examplesIf requireNamespace("RSQLite", quietly = TRUE)
@@ -41,7 +42,9 @@ get_connection <- function(drv = RPostgres::Postgres(),
                            password = NULL,
                            timezone = NULL,
                            timezone_out = NULL,
-                           ...) {
+                           ...,
+                           bigint = "integer",
+                           check_interrupts = TRUE) {
 
   # Check arguments
   checkmate::assert_character(host, pattern = r"{^\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}$}", null.ok = TRUE)
@@ -52,15 +55,6 @@ get_connection <- function(drv = RPostgres::Postgres(),
   checkmate::assert_character(timezone, null.ok = TRUE)
   checkmate::assert_character(timezone_out, null.ok = TRUE)
 
-  .supported_drivers <- c(
-    "PqDriver",
-    "SQLiteDriver"
-  )
-
-  if (!class(drv) %in% .supported_drivers) {
-    warning("Driver of class '", class(drv), "' is currently not fully supported and SCDB may not perform as expected.")
-  }
-
   # Set PostgreSQL-specific options
   if (inherits(drv, "PqDriver")) {
     if (is.null(timezone)) timezone <- Sys.timezone()
@@ -70,25 +64,29 @@ get_connection <- function(drv = RPostgres::Postgres(),
   # Default SQLite connections to temporary on-disk database
   if (inherits(drv, "SQLiteDriver") && is.null(dbname)) dbname <- ""
 
+  args <- list(...) |>
+    append(as.list(rlang::current_env())) |>
+    unlist()
+
+  args <- args[match(unique(names(args)), names(args))]
+
   # Check if connection can be established given these settings
-  tryCatch({
-    args <- append(list(...), as.list(environment()))
-    status <- do.call(DBI::dbCanConnect, args = args)
+  status <- do.call(DBI::dbCanConnect, args = args)
+  if (!status) rlang::abort(attr(status, "reason"))
 
-    if (!status) rlang::abort(attr(status, "reason"))
-  })
+  conn <- do.call(DBI::dbConnect, args = args)
 
-  conn <- DBI::dbConnect(drv = drv,
-                         dbname = dbname,
-                         host = host,
-                         port = port,
-                         user = user,
-                         password = password,
-                         timezone = timezone,
-                         timezone_out = timezone_out,
-                         ...,
-                         bigint = "integer", # R has poor integer64 integration, which is the default return
-                         check_interrupts = TRUE)
+  .supported <- c(
+    "PqConnection",
+    "SQLiteConnection",
+    "Microsoft SQL Server"
+  )
+
+  if (!class(conn) %in% .supported) {
+    warning("Connections of class '",
+            class(conn),
+            "' is currently not fully supported and SCDB may not perform as expected.")
+  }
 
   return(conn)
 }
@@ -127,18 +125,24 @@ close_connection <- function(conn) {
 #' @seealso [DBI::Id] which this function wraps.
 #' @export
 id <- function(db_table_id, conn = NULL, allow_table_only = TRUE) {
+  if (inherits(db_table_id, "Id")) {
+    return(db_table_id)
+  }
 
-  # Check if already Id
-  if (inherits(db_table_id, "Id")) return(db_table_id)
+  if (!allow_table_only) checkmate::check_class(conn, "DBIConnection")
 
-  # Check arguments
-  checkmate::assert_character(db_table_id)
+  UseMethod("id")
+}
+
+#' @export
+id.character <- function(db_table_id, conn = NULL, allow_table_only = TRUE) {
 
   if (stringr::str_detect(db_table_id, "\\.")) {
     db_name <- stringr::str_split_1(db_table_id, "\\.")
     db_schema <- db_name[1]
     db_table  <- db_name[2]
 
+    # If no matching implied schema is found, return the unmodified db_table_id
     if (allow_table_only && !is.null(conn) && !schema_exists(conn, db_schema)) {
       return(DBI::Id(table = db_table_id))
     }
@@ -148,4 +152,23 @@ id <- function(db_table_id, conn = NULL, allow_table_only = TRUE) {
   }
 
   return(DBI::Id(schema = db_schema, table = db_table))
+}
+
+#' @export
+id.tbl_dbi <- function(db_table_id, conn = NULL, allow_table_only = TRUE) {
+  table_ident <- dbplyr::remote_table(db_table_id)
+
+  id <- with(table_ident, {
+    list(catalog = catalog,
+         schema = schema,
+         table = table) |>
+      (\(.x) subset(.x, !is.na(.x)))() |>
+      do.call(DBI::Id, args = _)
+  })
+
+  if (!is.null(conn) && !identical(conn, dbplyr::remote_con(db_table_id))) {
+    rlang::warn("Table connection is different than conn")
+  }
+
+  return(id)
 }

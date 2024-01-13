@@ -1,3 +1,25 @@
+# SCDB 0.3
+
+* Added support for Microsoft SQL Server using ODBC (#77).
+
+## Minor Improvements and Fixes
+
+* Implementation of `*_join`s improved, now extending `dplyr::*_join`s rather than masking them (#77).
+
+* Added S3 method for `id.tbl_dbi`, returning a `DBI::Id()` instance matching the table (#72).
+  - Calling `id` on a `tbl_dbi` thus allows to retrieve a `schema` even when not
+    initially given.
+
+* Fixed `update_snapshot()` not working with a `DBI::Id()` instance as `db_table` argument (#72).
+
+* Suppressed recurring messages from dbplyr >= 2.4.0 about table names containing `.`.
+
+* Added `show_temp` option to `get_tables()` to allow retrieving temporary tables.
+
+## Other news
+
+* Maintainer changed to Rasmus Skytte Randløv (@RasmusSkytte).
+
 # SCDB 0.2.1
 
 ## Minor Improvements and Fixes

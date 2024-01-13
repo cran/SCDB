@@ -1,7 +1,7 @@
 #' Update a historical table
 #' @template .data_dbi
 #' @template conn
-#' @template db_table
+#' @param db_table An object that inherits from `tbl_dbi`, a [DBI::Id()] object or a character string readable by [id].
 #' @param timestamp
 #'   A timestamp (POSIXct) with which to update from_ts/until_ts columns
 #' @template filters
@@ -29,7 +29,7 @@
 #' @seealso filter_keys
 #' @importFrom rlang .data
 #' @export
-update_snapshot <- function(.data, conn, db_table, timestamp, filters = NULL, message = NULL, tic = Sys.time(), # nolint: cyclocomp_linter
+update_snapshot <- function(.data, conn, db_table, timestamp, filters = NULL, message = NULL, tic = Sys.time(), # nolint: cyclocomp_linter, line_length_linter
                             logger = NULL,
                             enforce_chronological_order = TRUE) {
 
@@ -44,22 +44,17 @@ update_snapshot <- function(.data, conn, db_table, timestamp, filters = NULL, me
   checkmate::assert_class(logger, "Logger", null.ok = TRUE)
   checkmate::assert_logical(enforce_chronological_order)
 
+  # Retrieve Id from any valid db_table inputs to correctly create a missing table
+  db_table_id <- id(db_table, conn)
+  db_table_name <- db_table_id |>
+    methods::slot("name") |>
+    stats::na.omit() |>
+    paste(collapse = ".")
 
-  # If db_table is given as str, fetch the actual table
-  # If the table does not exist, create an empty table using the signature of the incoming data
-  if (is.character(db_table)) {
-
-    db_table_name <- db_table
-    db_table_id <- id(db_table, conn)
-
-    if (table_exists(conn, db_table)) {
-      db_table <- dplyr::tbl(conn, db_table_id)
-    } else {
-      db_table <- create_table(dplyr::collect(utils::head(.data, 0)), conn, db_table_id, temporary = FALSE)
-    }
+  if (table_exists(conn, db_table_id)) {
+    db_table <- dplyr::tbl(conn, db_table_id, check_from = FALSE)
   } else {
-    db_table_id <- dbplyr::remote_name(db_table)
-    db_table_name <- db_table_id |> as.character() |> stringr::str_remove_all('\"')
+    db_table <- create_table(dplyr::collect(utils::head(.data, 0)), conn, db_table_id, temporary = FALSE)
   }
 
   # Initialize logger
@@ -113,6 +108,7 @@ update_snapshot <- function(.data, conn, db_table, timestamp, filters = NULL, me
 
   # Convert timestamp to character to prevent inconsistent R behavior with date/timestamps
   timestamp <- strftime(timestamp)
+  db_latest <- strftime(db_latest)
 
   if (enforce_chronological_order && timestamp < db_latest) {
     logger$log_to_db(success = FALSE, end_time = !!db_timestamp(tic, conn))
@@ -184,7 +180,7 @@ update_snapshot <- function(.data, conn, db_table, timestamp, filters = NULL, me
 
 
   if (nrow_to_remove > 0) {
-    dplyr::rows_update(x = dplyr::tbl(conn, db_table_id),
+    dplyr::rows_update(x = dplyr::tbl(conn, db_table_id, check_from = FALSE),
                        y = to_remove,
                        by = c("checksum", "from_ts"),
                        in_place = TRUE,
@@ -196,7 +192,7 @@ update_snapshot <- function(.data, conn, db_table, timestamp, filters = NULL, me
   logger$log_info("Adding new records")
 
   if (nrow_to_add > 0) {
-    dplyr::rows_append(x = dplyr::tbl(conn, db_table_id),
+    dplyr::rows_append(x = dplyr::tbl(conn, db_table_id, check_from = FALSE),
                        y = to_add,
                        in_place = TRUE)
   }
@@ -207,13 +203,13 @@ update_snapshot <- function(.data, conn, db_table, timestamp, filters = NULL, me
 
   # If several updates come in a single day, some records may have from_ts = until_ts.
   # We remove these records here
-  redundant_rows <- dplyr::tbl(conn, db_table_id) |>
+  redundant_rows <- dplyr::tbl(conn, db_table_id, check_from = FALSE) |>
     dplyr::filter(.data$from_ts == .data$until_ts) |>
     dplyr::select("checksum", "from_ts")
   nrow_redundant <- nrow(redundant_rows)
 
   if (nrow_redundant > 0) {
-    dplyr::rows_delete(dplyr::tbl(conn, db_table_id),
+    dplyr::rows_delete(dplyr::tbl(conn, db_table_id, check_from = FALSE),
                        redundant_rows,
                        by = c("checksum", "from_ts"),
                        in_place = TRUE, unmatched = "ignore")
@@ -224,7 +220,7 @@ update_snapshot <- function(.data, conn, db_table, timestamp, filters = NULL, me
   # checksum is the same, and from_ts / until_ts are continuous
   # We collapse these records here
   if (!enforce_chronological_order) {
-    redundant_rows <- dplyr::tbl(conn, db_table_id) |>
+    redundant_rows <- dplyr::tbl(conn, db_table_id, check_from = FALSE) |>
       filter_keys(filters)
 
     redundant_rows <- dplyr::inner_join(
@@ -244,7 +240,7 @@ update_snapshot <- function(.data, conn, db_table, timestamp, filters = NULL, me
       dplyr::compute()
 
     if (nrow(redundant_rows_to_delete) > 0) {
-      dplyr::rows_delete(x = dplyr::tbl(conn, db_table_id),
+      dplyr::rows_delete(x = dplyr::tbl(conn, db_table_id, check_from = FALSE),
                          y = redundant_rows_to_delete,
                          by = c("checksum", "from_ts"),
                          in_place = TRUE,
@@ -252,7 +248,7 @@ update_snapshot <- function(.data, conn, db_table, timestamp, filters = NULL, me
     }
 
     if (nrow(redundant_rows_to_update) > 0) {
-      dplyr::rows_update(x = dplyr::tbl(conn, db_table_id),
+      dplyr::rows_update(x = dplyr::tbl(conn, db_table_id, check_from = FALSE),
                          y = redundant_rows_to_update,
                          by = c("checksum", "from_ts"),
                          in_place = TRUE,

@@ -15,12 +15,15 @@ dbi
 DBIConnection
 DBIDriver
 dbname
-Donut
 dbplyr
 dbplyr's
+Donut
 dplyr
 drv
 
+funder
+
+Institut
 ip
 
 Kimball
@@ -32,6 +35,7 @@ na
 notin
 nrow
 
+ODBC
 ORCID
 
 pgpass
@@ -46,6 +50,8 @@ RPostgres
 Skytte
 sql
 SQLiteConnections
+SSI
+Statens
 Sys
 
 tbl

@@ -49,7 +49,7 @@ create_table <- function(.data, conn = NULL, db_table_id, temporary = TRUE, ...)
                      temporary = temporary,
                      ...)
 
-  return(invisible(dplyr::tbl(conn, db_table_id)))
+  return(invisible(dplyr::tbl(conn, db_table_id, check_from = FALSE)))
 }
 
 
@@ -73,8 +73,15 @@ methods::setMethod("getTableSignature", "DBIConnection", function(.data, conn) {
       checksum = "TEXT",
       from_ts  = "TEXT",
       until_ts = "TEXT"
+    ),
+    "Microsoft SQL Server" = c(
+      checksum = "varchar(32)",
+      from_ts  = "DATETIME2",
+      until_ts = "DATETIME2"
     )
   )
+
+  checkmate::assert_choice(class(conn), names(backend_coltypes))
 
   # Update columns with indices instead of names to avoid conflicts
   special_cols <- backend_coltypes[[class(conn)]]
@@ -126,5 +133,5 @@ create_logs_if_missing <- function(log_table, conn) {
     DBI::dbWriteTable(conn, id(log_table, conn), log_signature)
   }
 
-  return(dplyr::tbl(conn, id(log_table, conn)))
+  return(dplyr::tbl(conn, id(log_table, conn), check_from = FALSE))
 }

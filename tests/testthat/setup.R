@@ -6,7 +6,8 @@ conflicted::conflict_prefer("id", "SCDB")
 conn_list <- list(
   # Backend string = package::function
   "SQLite"     = "RSQLite::SQLite",
-  "PostgreSQL" = "RPostgres::Postgres"
+  "PostgreSQL" = "RPostgres::Postgres",
+  "MSSQL"      = "odbc::odbc"
 )
 
 get_driver <- function(x = character(), ...) {
@@ -30,27 +31,47 @@ get_driver <- function(x = character(), ...) {
 conns <- lapply(conn_list, get_driver) |>
   unlist()
 
+# Access any arguments to
+odbc_json <- Sys.getenv("SCDB_ODBC_JSON")
+if (odbc_json != "" && rlang::is_installed("jsonlite")) {
+  conns <- jsonlite::fromJSON(odbc_json) |>
+    lapply(\(.x) {
+      .x$drv <- odbc::odbc()
+
+      return(do.call(DBI::dbConnect, args = .x))
+    }) |>
+    append(conns, x = _)
+}
+
 if (length(conns[names(conns) != "SQLite"]) == 0) {
   message("No useful drivers (other than SQLite) were found!")
 }
 
-
 message("#####\n",
         "Following drivers will be tested:\n",
-        sprintf("  %s (%s)\n", conn_list[names(conns)], names(conns)),
-        sep = "")
+        paste0(sprintf("  %s (%s)",
+                       conn_list[names(conns)],
+                       names(conns)), collapse = "\n"))
 
-unavailable_drv <- conn_list[which(!names(conn_list) %in% names(conns))]
+unavailable_drv <-
+  conn_list[which(!names(conn_list) %in% names(conns))]
 if (length(unavailable_drv) > 0) {
-  message("\nFollowing drivers were not found and will NOT be tested:\n",
-          sprintf("  %s (%s)\n", conn_list[names(unavailable_drv)], names(unavailable_drv)),
-          sep = "")
+  message(
+    "\n",
+    "Following drivers were not found and will NOT be tested:\n",
+    paste0(sprintf(
+      "  %s (%s)",
+      conn_list[names(unavailable_drv)],
+      names(unavailable_drv)
+    ), collapse = "\n")
+  )
 }
-message("#####\n")
+message("#####")
 
 # Attach tempfile as schema for SQLite
-if ("SQLite" %in% names(conns)) {
-  DBI::dbExecute(conns$SQLite, paste0("ATTACH '", tempfile(), "' AS 'test'"))
+for (conn in conns) {
+  if (!inherits(conn, "SQLiteConnection")) next
+  DBI::dbExecute(conn, paste0("ATTACH '", tempfile(), "' AS 'test'"))
 }
 
 # Start with some clean up
