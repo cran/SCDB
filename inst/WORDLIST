@@ -6,6 +6,8 @@ checksums
 cloneable
 CMD
 Codecov
+coercible
+codecov
 colname
 conn
 cr
@@ -20,16 +22,27 @@ dbplyr's
 Donut
 dplyr
 drv
+DuckDB
+
+endblock
+Engbo
 
 funder
 
+github
+
+IANA
 Institut
 ip
 
 Kimball
 
+Lasse
+LoggerNull
+
 Margy
 md
+myschema
 
 na
 notin
@@ -38,15 +51,21 @@ nrow
 ODBC
 ORCID
 
+parsable
 pgpass
+pid
 POSIXct
 Postgres
 printf
 
 Rasmus
+README
 realpath
+Rmd
 RPostgres
 
+schemas
+SHA
 Skytte
 sql
 SQLiteConnections
@@ -55,6 +74,10 @@ Statens
 Sys
 
 tbl
+tempdb
 tibble
 tidyr
 tidyverse
+
+un
+unmanipulated

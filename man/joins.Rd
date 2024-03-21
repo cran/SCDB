@@ -10,17 +10,17 @@
 \alias{anti_join.tbl_sql}
 \title{SQL Joins}
 \usage{
-inner_join.tbl_sql(x, y, by = NULL, ...)
+\method{inner_join}{tbl_sql}(x, y, by = NULL, ...)
 
-left_join.tbl_sql(x, y, by = NULL, ...)
+\method{left_join}{tbl_sql}(x, y, by = NULL, ...)
 
-right_join.tbl_sql(x, y, by = NULL, ...)
+\method{right_join}{tbl_sql}(x, y, by = NULL, ...)
 
-full_join.tbl_sql(x, y, by = NULL, ...)
+\method{full_join}{tbl_sql}(x, y, by = NULL, ...)
 
-semi_join.tbl_sql(x, y, by = NULL, ...)
+\method{semi_join}{tbl_sql}(x, y, by = NULL, ...)
 
-anti_join.tbl_sql(x, y, by = NULL, ...)
+\method{anti_join}{tbl_sql}(x, y, by = NULL, ...)
 }
 \arguments{
 \item{x, y}{A pair of lazy data frames backed by database queries.}
@@ -62,37 +62,45 @@ query, and use \code{\link[dbplyr:collect.tbl_sql]{collect()}} to execute the qu
 and return data to R.
 }
 \description{
-Overloads the dplyr \verb{*_join} to accept an na_by argument.
+Overloads the dplyr \verb{*_join} to accept an \code{na_by} argument.
 By default, joining using SQL does not match on \code{NA} / \code{NULL}.
-dbplyr has the option "na_matches = na" to match on \code{NA} / \code{NULL} but this is very inefficient
-This function does the matching more efficiently.
-If a column contains \code{NA} / \code{NULL}, give the argument to na_by to match during the join
-If no na_by is given, the function defaults to using \verb{dplyr::*_join}
+dbplyr \verb{*_join}s has the option "na_matches = na" to match on \code{NA} / \code{NULL} but this is very inefficient in some
+cases.
+This function does the matching more efficiently:
+If a column contains \code{NA} / \code{NULL}, the names of these columns can be passed via the \code{na_by} argument and
+efficiently match as if "na_matches = na".
+If no \code{na_by} argument is given is given, the function defaults to using \verb{dplyr::*_join}.
 }
 \examples{
-library(dplyr, warn.conflicts = FALSE)
-library(dbplyr, warn.conflicts = FALSE)
-band_db <- tbl_memdb(dplyr::band_members)
-instrument_db <- tbl_memdb(dplyr::band_instruments)
-band_db \%>\% left_join(instrument_db) \%>\% show_query()
+\dontshow{if (requireNamespace("RSQLite", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
+  library(dplyr, warn.conflicts = FALSE)
+  library(dbplyr, warn.conflicts = FALSE)
 
-# Can join with local data frames by setting copy = TRUE
-band_db \%>\%
-  left_join(dplyr::band_instruments, copy = TRUE)
+  band_db <- tbl_memdb(dplyr::band_members)
+  instrument_db <- tbl_memdb(dplyr::band_instruments)
 
-# Unlike R, joins in SQL don't usually match NAs (NULLs)
-db <- memdb_frame(x = c(1, 2, NA))
-label <- memdb_frame(x = c(1, NA), label = c("one", "missing"))
-db \%>\% left_join(label, by = "x")
-# But you can activate R's usual behaviour with the na_matches argument
-db \%>\% left_join(label, by = "x", na_matches = "na")
+  left_join(band_db, instrument_db) |>
+    show_query()
 
-# By default, joins are equijoins, but you can use `sql_on` to
-# express richer relationships
-db1 <- memdb_frame(x = 1:5)
-db2 <- memdb_frame(x = 1:3, y = letters[1:3])
-db1 \%>\% left_join(db2) \%>\% show_query()
-db1 \%>\% left_join(db2, sql_on = "LHS.x < RHS.x") \%>\% show_query()
+  # Can join with local data frames by setting copy = TRUE
+  left_join(band_db, dplyr::band_instruments, copy = TRUE)
+
+  # Unlike R, joins in SQL don't usually match NAs (NULLs)
+  db <- memdb_frame(x = c(1, 2, NA))
+  label <- memdb_frame(x = c(1, NA), label = c("one", "missing"))
+  left_join(db, label, by = "x")
+
+  # But you can activate R's usual behaviour with the na_matches argument
+  left_join(db, label, by = "x", na_matches = "na")
+
+  # By default, joins are equijoins, but you can use `sql_on` to
+  # express richer relationships
+  db1 <- memdb_frame(x = 1:5)
+  db2 <- memdb_frame(x = 1:3, y = letters[1:3])
+
+  left_join(db1, db2) |> show_query()
+  left_join(db1, db2, sql_on = "LHS.x < RHS.x") |> show_query()
+\dontshow{\}) # examplesIf}
 }
 \seealso{
 \link[dplyr:mutate-joins]{dplyr::mutate-joins} which this function wraps.

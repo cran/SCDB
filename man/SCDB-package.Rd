@@ -14,20 +14,22 @@ A collection of functions that enable easy access and updating of a database of 
 Useful links:
 \itemize{
   \item \url{https://github.com/ssi-dk/SCDB}
+  \item \url{https://ssi-dk.github.io/SCDB/}
   \item Report bugs at \url{https://github.com/ssi-dk/SCDB/issues}
 }
 
 }
 \author{
-\strong{Maintainer}: Rasmus Skytte Randløv \email{rske@ssi.dk} (\href{https://orcid.org/0000-0002-5860-3838}{ORCID})
+\strong{Maintainer}: Rasmus Skytte Randløv \email{rske@ssi.dk} (\href{https://orcid.org/0000-0002-5860-3838}{ORCID}) [reviewer]
 
 Authors:
 \itemize{
-  \item Marcus Munch Grünewald \email{mmgr@ssi.dk} (\href{https://orcid.org/0009-0006-8090-406X}{ORCID})
+  \item Marcus Munch Grünewald (\href{https://orcid.org/0009-0006-8090-406X}{ORCID})
 }
 
 Other contributors:
 \itemize{
+  \item Lasse Engbo Christiansen \email{lsec@ssi.dk} (\href{https://orcid.org/0000-0001-5019-1931}{ORCID}) [reviewer]
   \item Statens Serum Institut [copyright holder, funder]
 }
 

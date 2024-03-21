@@ -1,31 +1,27 @@
 #' Create a historical table from input data
 #'
-#' @name create_table
-#'
 #' @template .data
 #' @template conn
-#' @template db_table_id
-#' @param temporary Should the table be created as a temporary table?
-#' @param ... Other arguments passed to [DBI::dbCreateTable()]
-#' @return Invisibly returns the table as it looks on the destination (or locally if conn is NULL)
-#' @examples
-#' conn <- get_connection(drv = RSQLite::SQLite())
+#' @template db_table
+#' @param ...
+#'   Other arguments passed to [DBI::dbCreateTable()].
+#' @return
+#'   Invisibly returns the table as it looks on the destination (or locally if `conn` is `NULL`).
+#' @examplesIf requireNamespace("RSQLite", quietly = TRUE)
+#'   conn <- get_connection()
 #'
-#' create_table(mtcars, conn = conn, db_table_id = "mtcars_tmp")
+#'   create_table(mtcars, conn = conn, db_table = "mtcars")
 #'
-#' close_connection(conn)
+#'   close_connection(conn)
 #' @export
-create_table <- function(.data, conn = NULL, db_table_id, temporary = TRUE, ...) {
+create_table <- function(.data, conn = NULL, db_table, ...) {                                                           # nolint: function_argument_linter
 
   checkmate::assert_class(.data, "data.frame")
   checkmate::assert_class(conn, "DBIConnection", null.ok = TRUE)
-  assert_id_like(db_table_id)
+  assert_id_like(db_table)
 
   # Assert unique column names (may cause unexpected getTableSignature results)
   checkmate::assert_character(names(.data), unique = TRUE)
-
-  # Convert db_table_id to id (id() returns early if this is the case)
-  db_table_id <- id(db_table_id, conn = conn)
 
   if (is.historical(.data)) {
     stop("checksum/from_ts/until_ts column(s) already exist(s) in .data!")
@@ -39,99 +35,56 @@ create_table <- function(.data, conn = NULL, db_table_id, temporary = TRUE, ...)
                   .after = tidyselect::everything())
 
   # Early return if there is no connection to push to
-  if (is.null(conn)) return(invisible(.data))
+  if (is.null(conn)) return(invisible(utils::head(.data, 0)))
 
-  # Create the table on the remote and return the table
-  stopifnot("Table already exists!" = !table_exists(conn, db_table_id))
-  DBI::dbCreateTable(conn = conn,
-                     name = db_table_id,
-                     fields = getTableSignature(.data = .data, conn = conn),
-                     temporary = temporary,
-                     ...)
+  # Convert to id
+  # But supply no "conn" argument to prevent inference of (default) schema
+  db_table_id <- id(db_table)
 
-  return(invisible(dplyr::tbl(conn, db_table_id, check_from = FALSE)))
-}
+  # Check db_table_id conforms to requirements:
+  # 1) Temporary tables on some backends must to begin with "#".
+  # 2) DBI::dbCreateTable requires that table Ids are unqualified if the table should be temporary
+  if (purrr::pluck(list(...), "temporary", .default = formals(DBI::dbCreateTable)$temporary)) {
 
-
-
-#' @importFrom methods setGeneric
-methods::setGeneric("getTableSignature",
-                    function(.data, conn = NULL) standardGeneric("getTableSignature"),
-                    signature = "conn")
-
-methods::setMethod("getTableSignature", "DBIConnection", function(.data, conn) {
-  # Define the column types to be updated based on backend class
-  col_types <- DBI::dbDataType(conn, .data)
-
-  backend_coltypes <- list(
-    "PqConnection" = c(
-      checksum = "TEXT",
-      from_ts  = "TIMESTAMP",
-      until_ts = "TIMESTAMP"
-    ),
-    "SQLiteConnection" = c(
-      checksum = "TEXT",
-      from_ts  = "TEXT",
-      until_ts = "TEXT"
-    ),
-    "Microsoft SQL Server" = c(
-      checksum = "varchar(32)",
-      from_ts  = "DATETIME2",
-      until_ts = "DATETIME2"
+    # If catalog/schema is given, it must match the temporary locations
+    checkmate::assert_choice(
+      purrr::pluck(db_table_id, "name", "schema"), get_schema(conn, temporary = TRUE),
+      null.ok = TRUE
     )
-  )
+    checkmate::assert_choice(
+      purrr::pluck(db_table_id, "name", "catalog"), get_catalog(conn, temporary = TRUE),
+      null.ok = TRUE
+    )
 
-  checkmate::assert_choice(class(conn), names(backend_coltypes))
+    table <- purrr::pluck(db_table_id, "name", "table")
+    schema <- purrr::pluck(db_table_id, "name", "schema", .default = get_schema(conn, temporary = TRUE))
+    catalog <- purrr::pluck(db_table_id, "name", "catalog", .default = get_catalog(conn, temporary = TRUE))
 
-  # Update columns with indices instead of names to avoid conflicts
-  special_cols <- backend_coltypes[[class(conn)]]
-  special_indices <- (1 + length(.data) - length(special_cols)):length(.data)
+    if (inherits(conn, "Microsoft SQL Server") && !startsWith(table, "#")) {
+      table <- paste0("#", table)
+    }
 
-  return(replace(col_types, special_indices, special_cols))
-})
+    # Create full and partial Ids of the table to create
+    dbi_create_table_id <- DBI::Id(table = table)
+    db_table_id <- DBI::Id("catalog" = catalog, "schema" = schema, "table" = table)
 
-methods::setMethod("getTableSignature", "NULL", function(.data, conn) {
-  # Emulate product of DBI::dbDataType
-  signature <- dplyr::summarise(.data, dplyr::across(tidyselect::everything(), ~ class(.)[1]))
+  } else {
 
-  stats::setNames(as.character(signature), names(signature))
-
-  return(signature)
-})
-
-
-#' Create a table with the SCDB log structure if it does not exists
-#' @template conn
-#' @param log_table A specification of where the logs should exist ("schema.table")
-#' @return A tbl_dbi with the generated (or existing) log table
-#' @examples
-#' conn <- get_connection(drv = RSQLite::SQLite())
-#' log_table_id <- id("test.logs", conn = conn, allow_table_only = TRUE)
-#'
-#' create_logs_if_missing(log_table_id, conn)
-#'
-#' close_connection(conn)
-#' @export
-create_logs_if_missing <- function(log_table, conn) {
-
-  checkmate::assert_class(conn, "DBIConnection")
-
-  if (!table_exists(conn, log_table)) {
-    log_signature <- data.frame(date = as.POSIXct(NA),
-                                schema = NA_character_,
-                                table = NA_character_,
-                                n_insertions = NA_integer_,
-                                n_deactivations = NA_integer_,
-                                start_time = as.POSIXct(NA),
-                                end_time = as.POSIXct(NA),
-                                duration = NA_character_,
-                                success = NA,
-                                message = NA_character_,
-                                log_file = NA_character_) |>
-      utils::head(0)
-
-    DBI::dbWriteTable(conn, id(log_table, conn), log_signature)
+    dbi_create_table_id <- db_table_id <- id(db_table_id, conn) # If permanent, use all available info
   }
 
-  return(dplyr::tbl(conn, id(log_table, conn), check_from = FALSE))
+  # Check if the table already exists
+  if (table_exists(conn, id(db_table_id, conn))) {
+    stop("Table ", db_table_id, " already exists!")
+  }
+
+  # Create the table on the remote and return the table
+  DBI::dbCreateTable(
+    conn = conn,
+    name = dbi_create_table_id,
+    fields = getTableSignature(.data = .data, conn = conn),
+    ...
+  )
+
+  return(invisible(dplyr::tbl(conn, db_table_id)))
 }

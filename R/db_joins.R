@@ -1,9 +1,10 @@
 #' Generate sql_on statement for na joins
-#' @details
+#'
+#' @description
 #'   This function generates a much faster SQL statement for NA join compared to dbplyr's _join with na_matches = "na".
 #' @inheritParams left_join
-#' @return A sql_on statement to join by such that "NA" are matched with "NA"
-#'   given the columns listed in "by" and "na_by"
+#' @return
+#'   A sql_on statement to join by such that "NA" are matched with "NA" given the columns listed in "by" and "na_by".
 #' @noRd
 join_na_sql <- function(x, by, na_by) {
   UseMethod("join_na_sql")
@@ -57,18 +58,23 @@ join_na_not_null <- function(by, na_by = NULL) {
   return(sql_on)
 }
 
+#' @noRd
 join_na_sql.tbl_dbi <- function(x, by, na_by) {
   return(join_na_not_distinct(by = by, na_by = na_by))
 }
 
+#' @noRd
 `join_na_sql.tbl_Microsoft SQL Server` <- function(x, by, na_by) {
   return(join_na_not_null(by = by, na_by = na_by))
 }
 
 #' Get colnames to select
+#'
 #' @inheritParams left_join
-#' @param left Boolean that control if joins is left (alternatively right) join
-#' @return A named character vector indicating which columns to select from x and y
+#' @param left (`logical(1)`)\cr
+#'   Is the join a left (alternatively right) join?
+#' @return
+#'   A named character vector indicating which columns to select from x and y.
 #' @noRd
 select_na_sql <- function(x, y, by, na_by, left = TRUE) {
 
@@ -77,8 +83,8 @@ select_na_sql <- function(x, y, by, na_by, left = TRUE) {
   cy  <- dplyr::setdiff(colnames(y), colnames(x)) # Variables only in y
 
   sql_select <-
-    c(paste0(colnames(x), ifelse(!colnames(x) %in% cx, ".x", "")),
-      paste0(colnames(y), ifelse(!colnames(y) %in% cy, ".y", ""))[!colnames(y) %in% all_by]) |>
+    c(paste0(colnames(x), ifelse(colnames(x) %in% cx, "", ".x")),
+      paste0(colnames(y), ifelse(colnames(y) %in% cy, "", ".y"))[!colnames(y) %in% all_by]) |>
     stats::setNames(c(colnames(x),
                       paste0(colnames(y), ifelse(colnames(y) %in% colnames(x), ".y", ""))[!colnames(y) %in% all_by]))
 
@@ -86,12 +92,13 @@ select_na_sql <- function(x, y, by, na_by, left = TRUE) {
 }
 
 
-#' A warning to users that SQL does not match on NA by default
-#' @return A warning that *_joins on SQL backends does not match NA by default
+#' Warn users that SQL does not match on NA by default
+#'
+#' @return
+#'   A warning that *_joins on SQL backends does not match NA by default.
 #' @noRd
 join_warn <- function() {
-  if (testthat::is_testing() || !interactive()) return()
-  if (identical(parent.frame(n = 2), globalenv())) {
+  if (interactive() && identical(parent.frame(n = 2), globalenv())) {
     rlang::warn(paste("*_joins in database-backend does not match NA by default.\n",
                       "If your data contains NA, the columns with NA values must be supplied to \"na_by\",",
                       "or you must specifiy na_matches = \"na\""),
@@ -100,13 +107,14 @@ join_warn <- function() {
 }
 
 
-#' A warning to users that SQL does not match on NA by default
-#' @return A warning that *_joins are still experimental
+#' Warn users that SQL joins by NA is experimental
+#'
+#' @return
+#'   A warning that *_joins are still experimental.
 #' @noRd
 join_warn_experimental <- function() {
-  if (testthat::is_testing() || !interactive()) return()
-  if (identical(parent.frame(n = 2), globalenv())) {
-    rlang::warn("*_joins with na_by is stil experimental. Please report issues to rassky",
+  if (interactive() && identical(parent.frame(n = 2), globalenv())) {
+    rlang::warn("*_joins with na_by is still experimental. Please report issues.",
                 .frequency = "once", .frequency_id = "*_join NA warning")
   }
 }
@@ -116,38 +124,46 @@ join_warn_experimental <- function() {
 #'
 #' @name joins
 #'
-#' @description Overloads the dplyr `*_join` to accept an na_by argument.
-#' By default, joining using SQL does not match on `NA` / `NULL`.
-#' dbplyr has the option "na_matches = na" to match on `NA` / `NULL` but this is very inefficient
-#' This function does the matching more efficiently.
-#' If a column contains `NA` / `NULL`, give the argument to na_by to match during the join
-#' If no na_by is given, the function defaults to using `dplyr::*_join`
+#' @description
+#'   Overloads the dplyr `*_join` to accept an `na_by` argument.
+#'   By default, joining using SQL does not match on `NA` / `NULL`.
+#'   dbplyr `*_join`s has the option "na_matches = na" to match on `NA` / `NULL` but this is very inefficient in some
+#'   cases.
+#'   This function does the matching more efficiently:
+#'   If a column contains `NA` / `NULL`, the names of these columns can be passed via the `na_by` argument and
+#'   efficiently match as if "na_matches = na".
+#'   If no `na_by` argument is given is given, the function defaults to using `dplyr::*_join`.
+#'
 #' @inheritParams dbplyr::join.tbl_sql
 #' @inherit dbplyr::join.tbl_sql return
-#' @examples
-#' library(dplyr, warn.conflicts = FALSE)
-#' library(dbplyr, warn.conflicts = FALSE)
-#' band_db <- tbl_memdb(dplyr::band_members)
-#' instrument_db <- tbl_memdb(dplyr::band_instruments)
-#' band_db %>% left_join(instrument_db) %>% show_query()
+#' @examplesIf requireNamespace("RSQLite", quietly = TRUE)
+#'   library(dplyr, warn.conflicts = FALSE)
+#'   library(dbplyr, warn.conflicts = FALSE)
 #'
-#' # Can join with local data frames by setting copy = TRUE
-#' band_db %>%
-#'   left_join(dplyr::band_instruments, copy = TRUE)
+#'   band_db <- tbl_memdb(dplyr::band_members)
+#'   instrument_db <- tbl_memdb(dplyr::band_instruments)
 #'
-#' # Unlike R, joins in SQL don't usually match NAs (NULLs)
-#' db <- memdb_frame(x = c(1, 2, NA))
-#' label <- memdb_frame(x = c(1, NA), label = c("one", "missing"))
-#' db %>% left_join(label, by = "x")
-#' # But you can activate R's usual behaviour with the na_matches argument
-#' db %>% left_join(label, by = "x", na_matches = "na")
+#'   left_join(band_db, instrument_db) |>
+#'     show_query()
 #'
-#' # By default, joins are equijoins, but you can use `sql_on` to
-#' # express richer relationships
-#' db1 <- memdb_frame(x = 1:5)
-#' db2 <- memdb_frame(x = 1:3, y = letters[1:3])
-#' db1 %>% left_join(db2) %>% show_query()
-#' db1 %>% left_join(db2, sql_on = "LHS.x < RHS.x") %>% show_query()
+#'   # Can join with local data frames by setting copy = TRUE
+#'   left_join(band_db, dplyr::band_instruments, copy = TRUE)
+#'
+#'   # Unlike R, joins in SQL don't usually match NAs (NULLs)
+#'   db <- memdb_frame(x = c(1, 2, NA))
+#'   label <- memdb_frame(x = c(1, NA), label = c("one", "missing"))
+#'   left_join(db, label, by = "x")
+#'
+#'   # But you can activate R's usual behaviour with the na_matches argument
+#'   left_join(db, label, by = "x", na_matches = "na")
+#'
+#'   # By default, joins are equijoins, but you can use `sql_on` to
+#'   # express richer relationships
+#'   db1 <- memdb_frame(x = 1:5)
+#'   db2 <- memdb_frame(x = 1:3, y = letters[1:3])
+#'
+#'   left_join(db1, db2) |> show_query()
+#'   left_join(db1, db2, sql_on = "LHS.x < RHS.x") |> show_query()
 #' @seealso [dplyr::mutate-joins] which this function wraps.
 #' @seealso [dbplyr::join.tbl_sql] which this function wraps.
 #' @exportS3Method dplyr::inner_join
@@ -265,15 +281,15 @@ full_join.tbl_sql <- function(x, y, by = NULL, ...) {
 
   .dots <- list(...)
 
-  if (!"na_by" %in% names(.dots)) {
-    if (inherits(x, "tbl_dbi") || inherits(y, "tbl_dbi")) join_warn()
-    return(dplyr::full_join(x, y, by = by, ...))
-  } else {
+  if ("na_by" %in% names(.dots)) {
     join_warn_experimental()
     # Full joins are hard...
     out <- dplyr::union(dplyr::left_join(x, y, by = by, na_by = .dots$na_by),
                         dplyr::right_join(x, y, by = by, na_by = .dots$na_by))
     return(out)
+  } else {
+    if (inherits(x, "tbl_dbi") || inherits(y, "tbl_dbi")) join_warn()
+    return(dplyr::full_join(x, y, by = by, ...))
   }
 }
 
@@ -289,11 +305,11 @@ semi_join.tbl_sql <- function(x, y, by = NULL, ...) {
 
   .dots <- list(...)
 
-  if (!"na_by" %in% names(.dots)) {
+  if ("na_by" %in% names(.dots)) {
+    stop("Not implemented")
+  } else {
     if (inherits(x, "tbl_dbi") || inherits(y, "tbl_dbi")) join_warn()
     return(dplyr::semi_join(x, y, by = by, ...))
-  } else {
-    stop("Not implemented")
   }
 }
 
@@ -309,10 +325,10 @@ anti_join.tbl_sql <- function(x, y, by = NULL, ...) {
 
   .dots <- list(...)
 
-  if (!"na_by" %in% names(.dots)) {
+  if ("na_by" %in% names(.dots)) {
+    stop("Not implemented")
+  } else {
     if (inherits(x, "tbl_dbi") || inherits(y, "tbl_dbi")) join_warn()
     return(dplyr::anti_join(x, y, by = by, ...))
-  } else {
-    stop("Not implemented")
   }
 }

@@ -1,114 +1,130 @@
-test_that("get_tables() works", { for (conn in conns) { # nolint: brace_linter
+test_that("get_table() returns list of tables if no table is requested", {
+  for (conn in get_test_conns()) {
 
-  tables <- get_tables(conn)
-  expect_s3_class(tables, "data.frame")
-
-  db_table_names <- tables |>
-    tidyr::unite("db_table_name", "schema", "table", sep = ".", na.rm = TRUE) |>
-    dplyr::pull(db_table_name)
-
-  expect_true("test.mtcars" %in% db_table_names)
-  expect_true("__mtcars" %in% db_table_names)
-
-  # Now test with pattern
-  db_table_names <- get_tables(conn, pattern = "__mt") |>
-    tidyr::unite("db_table_name", "schema", "table", sep = ".", na.rm = TRUE) |>
-    dplyr::pull(db_table_name)
-
-
-  expect_false("test.mtcars" %in% db_table_names)
-  expect_true("__mtcars" %in% db_table_names)
-}})
-
-
-test_that("table_exists() works", { for (conn in conns) { # nolint: brace_linter
-  expect_true(table_exists(conn, "__mtcars"))
-  expect_false(table_exists(conn, "__mctars"))
-
-  expect_true(table_exists(conn, DBI::Id(table = "__mtcars")))
-  expect_false(table_exists(conn, DBI::Id(table = "__mctars")))
-
-  expect_true(table_exists(conn, "test.mtcars"))
-  expect_false(table_exists(conn, "tset.mtcars"))
-
-  expect_true(table_exists(conn, DBI::Id(schema = "test", table = "mtcars")))
-  expect_false(table_exists(conn, DBI::Id(schema = "tset", table = "mtcars")))
-}})
-
-
-test_that("get_table() works", { for (conn in conns) { # nolint: brace_linter
-
-  mtcars_t <- tibble::tibble(mtcars |> dplyr::mutate(name = rownames(mtcars)))
-
-  # Lets try different ways to read __mtcars
-  expect_mapequal(get_table(conn, "__mtcars") |> dplyr::collect(), mtcars_t)
-  expect_equal(get_table(conn, id("__mtcars")) |> dplyr::collect(), mtcars_t)
-  t <- "__mtcars"
-  expect_equal(get_table(conn, t) |> dplyr::collect(), mtcars_t)
-  t <- id("__mtcars")
-  expect_equal(get_table(conn, t) |> dplyr::collect(), mtcars_t)
-
-  # And test.mtcars
-  expect_equal(get_table(conn, "test.mtcars") |> dplyr::collect(), mtcars_t)
-  expect_equal(get_table(conn, id("test.mtcars", conn)) |> dplyr::collect(), mtcars_t)
-  t <- "test.mtcars"
-  expect_equal(get_table(conn, t) |> dplyr::collect(), mtcars_t)
-  t <- id("test.mtcars", conn)
-  expect_equal(get_table(conn, t) |> dplyr::collect(), mtcars_t)
-
-  # Test some malformed inputs
-  expect_error(get_table(conn, "tset.mtcars"),     regexp = "Table tset.mtcars is not found!")
-  expect_error(get_table(conn, id("tset.mtcars", conn)), regexp = "Table tset.mtcars is not found!")
-  t <- "tset.mtcars"
-  expect_error(get_table(conn, t), regexp = "Table tset.mtcars is not found!")
-  t <- id("tset.mtcars", conn)
-  expect_error(get_table(conn, t), regexp = "Table tset.mtcars is not found!")
-}})
-
-test_that("get_table returns list of tables if no table is requested", { for (conn in conns) { # nolint: brace_linter
-  expect_message(get_table(conn),
-    regexp = "Select one of the following tables:"
-  )
-}})
-
-test_that("table_exists fails when multiple matches are found", {
-  for (conn in conns) {
-    # This test exploits ambiguous notation requiring schemas to exits
-    if (!inherits(conn, "SQLiteConnection")) next
-
-    if (!schema_exists(conn, "test.one")) {
-      tmp <- tempfile()
-      result <- DBI::dbExecute(
-        conn,
-        paste0("ATTACH '", tmp, "' AS \"test.one\"")
-      )
-    }
-
-    DBI::dbExecute(conn, 'CREATE TABLE "test"."one.two"(a TEXT)')
-    DBI::dbExecute(conn, 'CREATE TABLE "test.one"."two"(b TEXT)')
-
-    expect_error(
-      table_exists(conn, "test.one.two"),
-      regex = "More than one table matching 'test.one.two' was found!"
+    expect_message(
+      get_table(conn),
+      regexp = "Select one of the following tables:"
     )
+
+    connection_clean_up(conn)
   }
 })
 
-testthat::test_that("get_tables skips warning about no tables found in temporary databases", {
-  for (conn in conns) {
-    if (!inherits(conn, "SQLiteConnection")) next
 
-    temp_db_file <- tempfile(pattern = "SCDB_test", fileext = ".SQLite")
+test_that("get_table() works when tables/view exist", {
+  for (conn in get_test_conns()) {
 
-    # Clone the current connection
-    conn2 <- Filter(\(.x) identical(.x, conn), conns) |>
-      (\(.x) {
-        get_driver(getElement(conn_list, names(.x)), dbname = temp_db_file)
-      })()
+    mtcars_t <- tibble::tibble(mtcars |> dplyr::mutate(name = rownames(mtcars)))
 
-    expect_warning(get_tables(conn2),
-                   regex = "No tables found")
+    # Lets try different ways to read __mtcars (added during setup)
+    expect_mapequal(get_table(conn, "__mtcars")  |> dplyr::collect(), mtcars_t)
+    expect_equal(get_table(conn, id("__mtcars")) |> dplyr::collect(), mtcars_t)
+    t <- "__mtcars"
+    expect_equal(get_table(conn, t) |> dplyr::collect(), mtcars_t)
+    t <- id("__mtcars")
+    expect_equal(get_table(conn, t) |> dplyr::collect(), mtcars_t)
 
-    DBI::dbDisconnect(conn2)
+    # And test.mtcars (added during setup)
+    expect_equal(get_table(conn, "test.mtcars") |> dplyr::collect(), mtcars_t)
+    expect_equal(get_table(conn, id("test.mtcars", conn)) |> dplyr::collect(), mtcars_t)
+    t <- "test.mtcars"
+    expect_equal(get_table(conn, t) |> dplyr::collect(), mtcars_t)
+    t <- id("test.mtcars", conn)
+    expect_equal(get_table(conn, t) |> dplyr::collect(), mtcars_t)
+
+
+    # Check for the existence of views on backends that support it (added here)
+    if (checkmate::test_multi_class(conn, c("PqConnection", "Microsoft SQL Server"))) {
+
+      if (inherits(conn, "PqConnection")) {
+        DBI::dbExecute(conn, "CREATE VIEW __mtcars_view AS SELECT * FROM __mtcars LIMIT 10")
+      } else if (inherits(conn, "Microsoft SQL Server")) {
+        DBI::dbExecute(conn, "CREATE VIEW __mtcars_view AS SELECT TOP 10 * FROM __mtcars")
+      }
+
+      view_1 <- paste(c(get_schema(conn), "__mtcars_view"), collapse = ".")
+
+      expect_identical(nrow(get_table(conn, view_1)), 10)
+      expect_identical(
+        dplyr::collect(get_table(conn, view_1)),
+        dplyr::collect(utils::head(get_table(conn, "__mtcars"), 10))
+      )
+
+      DBI::dbExecute(conn, glue::glue("DROP VIEW {view_1}"))
+    }
+
+
+    connection_clean_up(conn)
+  }
+})
+
+
+test_that("get_table() works when table does not exist in default schema", {
+  for (conn in get_test_conns()) {
+
+    # Generate table in default schema that does not exist
+    k <- 0
+    while (k < 100) {
+      invalid_table_name <- paste(sample(letters, size = 16, replace = TRUE), collapse = "")
+      k <- k + 1
+      if (DBI::dbExistsTable(conn, id(invalid_table_name, conn))) next
+      break
+    }
+
+    if (k < 100) {
+
+      expect_error(
+        get_table(conn, invalid_table_name),
+        regexp = glue::glue("Table {as.character(id(invalid_table_name, conn))} could not be found!")
+      )
+      expect_error(
+        get_table(conn, id(invalid_table_name, conn)),
+        regexp = glue::glue("Table {as.character(id(invalid_table_name, conn))} could not be found!")
+      )
+      expect_error(
+        get_table(conn, id(invalid_table_name)),
+        regexp = glue::glue("Table {as.character(id(invalid_table_name, conn))} could not be found!")
+      )
+
+    } else {
+      warning("Non-existing table in default schema could not be generated!")
+    }
+
+    connection_clean_up(conn)
+  }
+})
+
+
+test_that("get_table() works when table does not exist in non-existing schema", {
+  for (conn in get_test_conns()) {
+
+    # Generate schema that does not exist
+    k <- 0
+    while (k < 100) {
+      invalid_schema_name <- paste(sample(letters, size = 16, replace = TRUE), collapse = "")
+      k <- k + 1
+      if (schema_exists(conn, invalid_schema_name)) next
+      break
+    }
+
+    if (k < 100) {
+
+      # Test some malformed inputs
+      invalid_table_name <- paste(invalid_schema_name, "mtcars", sep = ".")
+
+      expect_error(
+        get_table(conn, invalid_table_name),
+        regexp = glue::glue("Table {as.character(id(invalid_table_name, conn))} could not be found!")
+      )
+      expect_error(
+        get_table(conn, id(invalid_table_name, conn)),
+        regexp = glue::glue("Table {as.character(id(invalid_table_name, conn))} could not be found!")
+      )
+
+    } else {
+      warning("Non-existing schema could not be generated!")
+    }
+
+    connection_clean_up(conn)
   }
 })

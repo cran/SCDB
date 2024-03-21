@@ -1,10 +1,13 @@
-## ----setup, include = FALSE---------------------------------------------------
+## ----include = FALSE----------------------------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
 
+## ----library, eval = requireNamespace("tidyverse")----------------------------
 library(tidyverse)
+
+## ----setup, include = FALSE, eval = requireNamespace("tidyverse")-------------
 
 forecasts_full <- tribble(
   ~City, ~Forecast, ~ForecastDate,
@@ -32,9 +35,6 @@ forecasts_scd <- forecasts_full %>%
   select(!"ForecastDate") %>%
   arrange(ForecastFrom)
 
-# Only define one connection
-if (!exists("con")) con <- DBI::dbConnect(drv = RSQLite::SQLite(), dbname = ":memory:")
-
 forecasts_dated <- filter(forecasts_full, ForecastDate == "2023-09-28")
 forecasts <- select(forecasts_dated, !"ForecastDate")
 
@@ -42,19 +42,18 @@ forecasts2 <- filter(forecasts_full, ForecastDate == "2023-09-29") %>%
   select(!"ForecastDate")
 forecasts2a <- filter(forecasts_full, ForecastDate == "2023-09-29")
 
-## ----forecasts----------------------------------------------------------------
+## ----forecasts, eval = requireNamespace("tidyverse")--------------------------
 # Current date: 2023-09-28
 forecasts
 
-## ----forecasts2a--------------------------------------------------------------
+## ----forecasts2a, eval = requireNamespace("tidyverse")------------------------
 # Current date: 2023-09-29
 forecasts2
 
-## ----forecasts_full-----------------------------------------------------------
+## ----forecasts_full, eval = requireNamespace("tidyverse")---------------------
 forecasts_full
 
-## ----forecasts_full_examples--------------------------------------------------
-library(tidyverse)
+## ----forecasts_full_examples, eval = requireNamespace("tidyverse")------------
 
 # Current forecasts
 forecasts_full %>%
@@ -69,10 +68,10 @@ forecasts_full %>%
 forecasts_full %>%
   filter(City == "New York")
 
-## ----forecasts_scd------------------------------------------------------------
+## ----forecasts_scd, eval = requireNamespace("tidyverse")----------------------
 forecasts_scd
 
-## ----adresses_setup, include = FALSE------------------------------------------
+## ----adresses_setup, include = FALSE, eval = requireNamespace("tidyverse")----
 addresses <- tibble::tibble(
   ID = c(1,
          2,
@@ -128,32 +127,32 @@ addresses2 <- addresses %>%
   arrange(ValidFrom) %>%
   distinct()
 
-## ----addresses1---------------------------------------------------------------
+## ----addresses1, eval = requireNamespace("tidyverse")-------------------------
 addresses
 
-## ----addresses1a--------------------------------------------------------------
+## ----addresses1a, eval = requireNamespace("tidyverse")------------------------
 slice_timestamp <- "2021-03-02"
 
 addresses %>%
   filter(ID == 1,
-         ValidFrom < !!slice_timestamp &
-           (ValidUntil >= !!slice_timestamp | is.na(ValidUntil))) %>%
+         ValidFrom < !!slice_timestamp,
+         ValidUntil >= !!slice_timestamp | is.na(ValidUntil)) %>%
   select(!c("ValidFrom", "ValidUntil"))
 
-## ----addresses2---------------------------------------------------------------
+## ----addresses2, eval = requireNamespace("tidyverse")-------------------------
 filter(addresses2,
        ID == 1,
        Address == "Rainbow Road 8") %>%
   select(ID, GivenName, Surname, MovedIn, MovedOut, ValidFrom, ValidUntil)
 
-## ----addresses3---------------------------------------------------------------
+## ----addresses3, eval = requireNamespace("tidyverse")-------------------------
 slice_timestamp <- "2022-03-04"
 
 addresses2 %>%
   filter(Address == "Rainbow Road 8",
          is.na(MovedOut),
-         ValidFrom < !!slice_timestamp &
-           (ValidUntil >= !!slice_timestamp | is.na(ValidUntil))) %>%
+         ValidFrom < !!slice_timestamp,
+         ValidUntil >= !!slice_timestamp | is.na(ValidUntil)) %>%
   select(ID, GivenName, Surname, MovedIn, MovedOut)
 
 slice_timestamp <- "2023-09-29"
@@ -161,7 +160,7 @@ slice_timestamp <- "2023-09-29"
 addresses2 %>%
   filter(Address == "Rainbow Road 8",
          is.na(MovedOut),
-         ValidFrom < !!slice_timestamp &
-           (ValidUntil >= !!slice_timestamp | is.na(ValidUntil))) %>%
+         ValidFrom < !!slice_timestamp,
+         ValidUntil >= !!slice_timestamp | is.na(ValidUntil)) %>%
   select(ID, GivenName, Surname, MovedIn, MovedOut)
 
