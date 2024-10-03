@@ -403,7 +403,7 @@ columns: row names converted to a column <code>car</code>, and
 <span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>example_data <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">tbl</span>(conn, DBI<span class="sc">::</span><span class="fu">Id</span>(<span class="at">table =</span> <span class="st">&quot;example_data&quot;</span>))</span>
 <span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>example_data</span>
 <span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a><span class="co">#&gt; # Source:   table&lt;`example_data`&gt; [?? x 2]</span></span>
-<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co">#&gt; # Database: sqlite 3.45.0 [:memory:]</span></span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a><span class="co">#&gt; # Database: sqlite 3.46.0 [:memory:]</span></span>
 <span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a><span class="co">#&gt;    car                  hp</span></span>
 <span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="co">#&gt;    &lt;chr&gt;             &lt;dbl&gt;</span></span>
 <span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a><span class="co">#&gt;  1 Mazda RX4           110</span></span>
@@ -432,7 +432,7 @@ function, and include information on data validity period using
 <code>include_slice_info = TRUE</code>:</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="fu">get_table</span>(conn, <span class="st">&quot;mtcars&quot;</span>)</span>
 <span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="co">#&gt; # Source:   SQL [3 x 2]</span></span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="co">#&gt; # Database: sqlite 3.45.0 [:memory:]</span></span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a><span class="co">#&gt; # Database: sqlite 3.46.0 [:memory:]</span></span>
 <span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a><span class="co">#&gt;   car              hp</span></span>
 <span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;         &lt;dbl&gt;</span></span>
 <span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a><span class="co">#&gt; 1 Datsun 710       93</span></span>
@@ -441,7 +441,7 @@ function, and include information on data validity period using
 <span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a></span>
 <span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="fu">get_table</span>(conn, <span class="st">&quot;mtcars&quot;</span>, <span class="at">include_slice_info =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt; # Source:   SQL [3 x 5]</span></span>
-<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co">#&gt; # Database: sqlite 3.45.0 [:memory:]</span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co">#&gt; # Database: sqlite 3.46.0 [:memory:]</span></span>
 <span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a><span class="co">#&gt;   car              hp checksum                         from_ts          until_ts</span></span>
 <span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;         &lt;dbl&gt; &lt;chr&gt;                            &lt;chr&gt;               &lt;dbl&gt;</span></span>
 <span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="co">#&gt; 1 Datsun 710       93 08c864e3854eb5a1460d87b3360d636f 2020-01-01 11:0…       NA</span></span>
@@ -468,7 +468,7 @@ latest available data, including time-keeping with
 <code>include_slice_info = TRUE</code>:</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">get_table</span>(conn, <span class="st">&quot;mtcars&quot;</span>)</span>
 <span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="co">#&gt; # Source:   SQL [5 x 2]</span></span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="co">#&gt; # Database: sqlite 3.45.0 [:memory:]</span></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="co">#&gt; # Database: sqlite 3.46.0 [:memory:]</span></span>
 <span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="co">#&gt;   car                  hp</span></span>
 <span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;             &lt;dbl&gt;</span></span>
 <span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="co">#&gt; 1 Datsun 710           93</span></span>
@@ -479,7 +479,7 @@ latest available data, including time-keeping with
 <span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a></span>
 <span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="fu">get_table</span>(conn, <span class="st">&quot;mtcars&quot;</span>, <span class="at">include_slice_info =</span> <span class="cn">TRUE</span>)</span>
 <span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="co">#&gt; # Source:   SQL [5 x 5]</span></span>
-<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a><span class="co">#&gt; # Database: sqlite 3.45.0 [:memory:]</span></span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a><span class="co">#&gt; # Database: sqlite 3.46.0 [:memory:]</span></span>
 <span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a><span class="co">#&gt;   car                  hp checksum                         from_ts      until_ts</span></span>
 <span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;             &lt;dbl&gt; &lt;chr&gt;                            &lt;chr&gt;           &lt;dbl&gt;</span></span>
 <span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a><span class="co">#&gt; 1 Datsun 710           93 08c864e3854eb5a1460d87b3360d636f 2020-01-01 …       NA</span></span>
@@ -491,7 +491,7 @@ latest available data, including time-keeping with
 day before</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">get_table</span>(conn, <span class="st">&quot;mtcars&quot;</span>, <span class="at">slice_ts =</span> <span class="st">&quot;2020-01-01 11:00:00&quot;</span>)</span>
 <span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="co">#&gt; # Source:   SQL [3 x 2]</span></span>
-<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="co">#&gt; # Database: sqlite 3.45.0 [:memory:]</span></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="co">#&gt; # Database: sqlite 3.46.0 [:memory:]</span></span>
 <span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="co">#&gt;   car              hp</span></span>
 <span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;         &lt;dbl&gt;</span></span>
 <span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a><span class="co">#&gt; 1 Datsun 710       93</span></span>
@@ -512,7 +512,7 @@ function and see that the currently available data (with the changed hp
 value for Mazda RX4)</p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">get_table</span>(conn, <span class="st">&quot;mtcars&quot;</span>)</span>
 <span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="co">#&gt; # Source:   SQL [5 x 2]</span></span>
-<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="co">#&gt; # Database: sqlite 3.45.0 [:memory:]</span></span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a><span class="co">#&gt; # Database: sqlite 3.46.0 [:memory:]</span></span>
 <span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a><span class="co">#&gt;   car                  hp</span></span>
 <span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;             &lt;dbl&gt;</span></span>
 <span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a><span class="co">#&gt; 1 Datsun 710           93</span></span>
@@ -524,7 +524,7 @@ value for Mazda RX4)</p>
 time-keeping information) is returned:</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">get_table</span>(conn, <span class="st">&quot;mtcars&quot;</span>, <span class="at">slice_ts =</span> <span class="cn">NULL</span>)</span>
 <span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a><span class="co">#&gt; # Source:   table&lt;`main`.`mtcars`&gt; [6 x 5]</span></span>
-<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a><span class="co">#&gt; # Database: sqlite 3.45.0 [:memory:]</span></span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a><span class="co">#&gt; # Database: sqlite 3.46.0 [:memory:]</span></span>
 <span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="co">#&gt;   car                  hp checksum                         from_ts      until_ts</span></span>
 <span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;             &lt;dbl&gt; &lt;chr&gt;                            &lt;chr&gt;        &lt;chr&gt;   </span></span>
 <span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a><span class="co">#&gt; 1 Datsun 710           93 08c864e3854eb5a1460d87b3360d636f 2020-01-01 … &lt;NA&gt;    </span></span>

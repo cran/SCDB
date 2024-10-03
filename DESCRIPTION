@@ -2,7 +2,7 @@ Package: SCDB
 Type: Package
 Title: Easily Access and Maintain Time-Based Versioned Data
         (Slowly-Changing-Dimension)
-Version: 0.4.0
+Version: 0.4.1
 Authors@R: 
 	  c(person("Rasmus Skytte", "Randl\U00F8v", , "rske@ssi.dk",
 	           role = c("aut", "cre", "rev"),
@@ -20,7 +20,7 @@ Description: A collection of functions that enable easy access and updating of a
              For reference see Ralph Kimball and Margy Ross (2013, ISBN 9781118530801).
 License: GPL-3
 Encoding: UTF-8
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
 Imports: checkmate, DBI, dbplyr (>= 2.4.0), dplyr, glue, lifecycle,
         methods, openssl, parallelly, purrr, rlang, R6, stringr, tidyr,
         tidyselect, utils
@@ -33,7 +33,7 @@ Config/testthat/edition: 3
 BugReports: https://github.com/ssi-dk/SCDB/issues
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2024-03-21 09:06:53 UTC; B246705
+Packaged: 2024-10-03 06:26:23 UTC; B246705
 Author: Rasmus Skytte Randløv [aut, cre, rev]
     (<https://orcid.org/0000-0002-5860-3838>),
   Marcus Munch Grünewald [aut] (<https://orcid.org/0009-0006-8090-406X>),
@@ -42,4 +42,4 @@ Author: Rasmus Skytte Randløv [aut, cre, rev]
   Statens Serum Institut [cph, fnd]
 Maintainer: Rasmus Skytte Randløv <rske@ssi.dk>
 Repository: CRAN
-Date/Publication: 2024-03-21 09:30:02 UTC
+Date/Publication: 2024-10-03 23:01:07 UTC

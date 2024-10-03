@@ -1,3 +1,19 @@
+# SCDB 0.4.1
+
+## Improvements and Fixes
+
+* `Logger` now correctly writes to the "catalog" field on backends that support it (#149).
+
+* `get_schema()` now correctly returns the temporary schema on PostgreSQL backends (#139).
+
+* `get_tables()` now returns catalog on DuckDB backends (#145).
+
+* Deprecated `check_from` argument no longer used in `dbplyr` calls (#136).
+
+## Testing
+
+* Improved tests for `get_tables()` (#145).
+
 # SCDB 0.4.0
 
 ## BREAKING CHANGES:
