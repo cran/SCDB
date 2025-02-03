@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>SCDB: Benchmarks</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">SCDB: Benchmarks</h1>
+
+
+
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(magrittr)</span></code></pre></div>
+<p>To showcase the performance of <code>SCDB</code> on different
+database backends, we include this vignette that summarises a simple
+benchmark: A sample dataset is created based on the
+<code>datasets::iris</code> dataset. This data is repeated 10 times and
+given a unique ID (the row number of the data).</p>
+<p>This data forms the basis for three “snapshots” used in the
+benchmarks:</p>
+<ol style="list-style-type: decimal">
+<li><p>The data as described above.</p></li>
+<li><p>As 1. but where any <code>Sepal.Length</code> below the median is
+halved.</p></li>
+<li><p>As 2. but where any <code>Sepal.width</code> below the median is
+halved.</p></li>
+</ol>
+<p>The benchmark function uses three consecutive calls to
+<code>update_snapshot()</code> to create the table with first snapshot
+and then update it to the second and third snapshot. Finally, the table
+is deleted.</p>
+<p>The performance of this benchmark function is timed with the
+<code>{microbenchmark}</code> package using 10 replicates. All
+benchmarks are run on the same machine.</p>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+<p>We include another benchmark to highlight the complexity scaling of
+the <code>update_snapshot()</code> with the size of the input data. The
+datasets are similar to the first benchmark, but the number of repeats
+is varied to see the impact of increasing data size. The benchmarks are
+run from a “clean” state, where the target_table does not exists. The
+benchmark measures both the time to create the table and to remove it
+again afterwards (to restore the clean state).</p>
+<p>The performance of this benchmark function is timed with the
+<code>{microbenchmark}</code> package using 5 replicates. All benchmarks
+are run on the same machine.</p>
+<p>The results of the benchmark are shown graphically below (mean and
+standard deviation) and with linear scaling (dotted line), where we
+compare the current development version of <code>SCDB</code> with the
+current CRAN version.</p>
+<p>NOTE: There are reports of a superlinear complexity for very large
+data sets. If you experience such problems, consider batching the
+updates via the <code>filters</code> argument.</p>
+<p><img src="data:image/png;base64,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" /><!-- --></p>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

@@ -13,7 +13,7 @@
 #' @export
 nrow <- function(.data) {
   if (inherits(.data, "tbl_dbi")) {
-    return(as.numeric(dplyr::pull(dplyr::count(dplyr::ungroup(.data)))))
+    return(as.integer(dplyr::pull(dplyr::count(dplyr::ungroup(.data)))))
   } else {
     return(base::nrow(.data))
   }
@@ -88,19 +88,17 @@ defer_db_cleanup <- function(db_table) {
 #' @param scope (`character(1)`)\cr
 #'   A naming scope to generate the table name within.
 #' @examples
-#'   print(unique_table_name()) # SCDB_001
-#'   print(unique_table_name()) # SCDB_002
+#'   print(unique_table_name()) # SCDB_<10 alphanumerical letters>
+#'   print(unique_table_name()) # SCDB_<10 alphanumerical letters>
 #'
-#'   print(unique_table_name("test")) # test_001
-#'   print(unique_table_name("test")) # test_002
+#'   print(unique_table_name("test")) # test_<10 alphanumerical letters>
+#'   print(unique_table_name("test")) # test_<10 alphanumerical letters>
 #'
 #' @return A character string for a table name based on the given scope parameter
 #' @export
 unique_table_name <- function(scope = "SCDB") {
-  option <- paste(scope, "table_name", sep = "_")
-  index <- getOption(option, default = 0) + 1
-  options(tibble::lst(!!option := index))
-  return(glue::glue("{scope}_{Sys.getpid()}_{sprintf('%03i', index)}"))
+  name <- paste0(sample(c(letters, LETTERS, 0:9), 10, replace = TRUE), collapse = "")
+  return(glue::glue("{scope}_{name}"))
 }
 
 
@@ -151,7 +149,7 @@ assert_timestamp_like <- function(timestamp, ..., add = NULL) {
 #' @noRd
 assert_dbtable_like <- function(db_table, ..., add = NULL) {
   checkmate::assert(
-    checkmate::check_character(db_table, pattern = r"{^\w*.\w*$}", ...),
+    checkmate::check_character(db_table, pattern = "^\\w*.\\w*$", ...),
     checkmate::check_class(db_table, "Id", ...),
     checkmate::check_class(db_table, "tbl_dbi", ...),
     add = add

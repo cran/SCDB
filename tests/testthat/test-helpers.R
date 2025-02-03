@@ -2,8 +2,8 @@ test_that("nrow() works", {
   for (conn in get_test_conns()) {
     x <- get_table(conn, "__mtcars")
 
-    expect_equal(nrow(x), dplyr::pull(dplyr::count(x)))
-    expect_equal(nrow(x), nrow(mtcars))
+    expect_identical(nrow(x), as.integer(dplyr::pull(dplyr::count(x))))
+    expect_identical(nrow(x), nrow(mtcars))
 
     connection_clean_up(conn)
   }
@@ -14,7 +14,7 @@ test_that("defer_db_cleanup() works in function call", {
   for (conn in get_test_conns()) {
     name <- unique_table_name()
 
-    test <- \() {
+    test <- function() {
       mt <- dplyr::copy_to(conn, mtcars, name, temporary = FALSE)
       expect_true(DBI::dbExistsTable(conn, id(name, conn)))
 
@@ -49,15 +49,15 @@ test_that("defer_db_cleanup() works with withr::deferred_run", {
 
 
 test_that("unique_table_name() works", {
-  # Store options before tests and reset (tests modify options)
-  opts <- options("SCDB_table_name" = NULL, "test_table_name" = NULL)
+  table_1 <- unique_table_name()
+  table_2 <- unique_table_name()
+  checkmate::expect_character(table_1, pattern = "SCDB_[a-zA-Z0-9]{10}")
+  checkmate::expect_character(table_2, pattern = "SCDB_[a-zA-Z0-9]{10}")
+  checkmate::expect_disjunct(table_1, table_2)
 
-  expect_equal(unique_table_name(), glue::glue("SCDB_{Sys.getpid()}_001"))
-  expect_equal(unique_table_name(), glue::glue("SCDB_{Sys.getpid()}_002"))
-
-  expect_equal(unique_table_name("test"), glue::glue("test_{Sys.getpid()}_001"))
-  expect_equal(unique_table_name("test"), glue::glue("test_{Sys.getpid()}_002"))
-
-  # Reset options
-  options(opts)
+  table_1 <- unique_table_name("test")
+  table_2 <- unique_table_name("test")
+  checkmate::expect_character(table_1, pattern = "test_[a-zA-Z0-9]{10}")
+  checkmate::expect_character(table_2, pattern = "test_[a-zA-Z0-9]{10}")
+  checkmate::expect_disjunct(table_1, table_2)
 })

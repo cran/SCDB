@@ -1,3 +1,26 @@
+# SCDB 0.5.0
+
+## New features
+
+* Added function `create_index()` to allow easy creating of an index on a table (#137).
+
+## Improvements and Fixes
+
+* `update_snapshot()` has been optimized and now runs faster on all the supported backends (#137).
+
+* `*_joins()` can now take `dplyr::join_by()` as `by` argument when no `na_by` argument is given (#156).
+
+* `SCDB` has been made backwards compatibility to R >= 3.6 (#164).
+
+* `nrow()` now always returns integers (#163).
+
+* `interlace_sql` has been fully deprecated and removed (#169).
+
+## Documentation
+
+* A vignette including benchmarks of `update_snapshot()` across various backends is added (#138).
+
+
 # SCDB 0.4.1
 
 ## Improvements and Fixes
@@ -8,11 +31,15 @@
 
 * `get_tables()` now returns catalog on DuckDB backends (#145).
 
+* `unique_table_names()` now uses random alphanumerics to form the unique name instead of tracking via options (#158).
+
+## Documentation
 * Deprecated `check_from` argument no longer used in `dbplyr` calls (#136).
 
 ## Testing
 
 * Improved tests for `get_tables()` (#145).
+
 
 # SCDB 0.4.0
 
@@ -176,6 +203,7 @@
 
 * Maintainer changed to Marcus Munch Grünewald (#59).
 
+
 # SCDB 0.2
 
 ## Breaking changes
@@ -213,6 +241,7 @@
 
 * As `schema_exists` on an empty schema tests by creating a new table, this may
   cause issues if the user does not have sufficient privileges.
+
 
 # SCDB 0.1
 

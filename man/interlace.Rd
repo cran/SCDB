@@ -2,12 +2,9 @@
 % Please edit documentation in R/interlace.R
 \name{interlace}
 \alias{interlace}
-\alias{interlace_sql}
 \title{Combine any number of tables, where each has their own time axis of validity}
 \usage{
 interlace(tables, by = NULL, colnames = NULL)
-
-interlace_sql(tables, by = NULL, colnames = NULL)
 }
 \arguments{
 \item{tables}{(\code{list}(\code{tbl_dbi(1)}))\cr
@@ -32,8 +29,6 @@ The combination of input queries with a single, interlaced valid_from / valid_un
 \description{
 The function "interlaces" the queries and combines their validity time axes (valid_from and valid_until)
 onto a single time axis.
-
-\code{interlace_sql()} is deprecated in favor of \code{interlace()}
 }
 \examples{
 \dontshow{if (requireNamespace("RSQLite", quietly = TRUE)) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
@@ -42,14 +37,14 @@ onto a single time axis.
   t1 <- data.frame(key = c("A", "A", "B"),
                    obs_1   = c(1, 2, 2),
                    valid_from  = as.Date(c("2021-01-01", "2021-02-01", "2021-01-01")),
-                   valid_until = as.Date(c("2021-02-01", "2021-03-01", NA))) |>
-    dplyr::copy_to(conn, df = _, name = "t1")
+                   valid_until = as.Date(c("2021-02-01", "2021-03-01", NA)))
+  t1 <- dplyr::copy_to(conn, df = t1, name = "t1")
 
   t2 <- data.frame(key = c("A", "B"),
                    obs_2 = c("a", "b"),
                    valid_from  = as.Date(c("2021-01-01", "2021-01-01")),
-                   valid_until = as.Date(c("2021-04-01", NA))) |>
-    dplyr::copy_to(conn, df = _, name = "t2")
+                   valid_until = as.Date(c("2021-04-01", NA)))
+  t2 <- dplyr::copy_to(conn, df = t2, name = "t2")
 
   interlace(list(t1, t2), by = "key")
 

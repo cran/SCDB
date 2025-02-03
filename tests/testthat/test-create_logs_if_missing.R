@@ -21,7 +21,7 @@ test_that("create_logs_if_missing() can create logs in default and test schema",
 
         # And check it conforms with the requirements
         expect_true(table_exists(conn, logs_id))
-        expect_identical(nrow(dplyr::tbl(conn, id(logs_id, conn))), 0)
+        expect_identical(nrow(dplyr::tbl(conn, id(logs_id, conn))), 0L)
 
         log_signature <- data.frame(
           date = as.POSIXct(character(0)),
@@ -42,8 +42,8 @@ test_that("create_logs_if_missing() can create logs in default and test schema",
           log_signature <- dplyr::select(log_signature, !"catalog")
         }
 
-        log_signature <- log_signature |>
-          dplyr::copy_to(conn, df = _, unique_table_name()) |>
+        log_signature <- log_signature %>%
+          dplyr::copy_to(conn, df = ., unique_table_name()) %>%
           dplyr::collect()
 
         expect_identical(
@@ -54,7 +54,7 @@ test_that("create_logs_if_missing() can create logs in default and test schema",
         # Attempting to recreate the logs table should not change anything
         expect_no_error(create_logs_if_missing(conn, log_table = logs_id))
         expect_true(table_exists(conn, logs_id))
-        expect_identical(nrow(dplyr::tbl(conn, id(logs_id, conn))), 0)
+        expect_identical(nrow(dplyr::tbl(conn, id(logs_id, conn))), 0L)
 
       } else {
         warning("Non-existing table in default schema could not be generated!")

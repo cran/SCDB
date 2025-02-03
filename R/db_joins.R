@@ -84,7 +84,7 @@ select_na_sql <- function(x, y, by, na_by, left = TRUE) {
 
   sql_select <-
     c(paste0(colnames(x), ifelse(colnames(x) %in% cx, "", ".x")),
-      paste0(colnames(y), ifelse(colnames(y) %in% cy, "", ".y"))[!colnames(y) %in% all_by]) |>
+      paste0(colnames(y), ifelse(colnames(y) %in% cy, "", ".y"))[!colnames(y) %in% all_by]) %>%
     stats::setNames(c(colnames(x),
                       paste0(colnames(y), ifelse(colnames(y) %in% colnames(x), ".y", ""))[!colnames(y) %in% all_by]))
 
@@ -145,7 +145,7 @@ join_warn_experimental <- function() {
 #'   band_db <- tbl_memdb(dplyr::band_members)
 #'   instrument_db <- tbl_memdb(dplyr::band_instruments)
 #'
-#'   left_join(band_db, instrument_db) |>
+#'   left_join(band_db, instrument_db) %>%
 #'     show_query()
 #'
 #'   # Can join with local data frames by setting copy = TRUE
@@ -164,29 +164,29 @@ join_warn_experimental <- function() {
 #'   db1 <- memdb_frame(x = 1:5)
 #'   db2 <- memdb_frame(x = 1:3, y = letters[1:3])
 #'
-#'   left_join(db1, db2) |> show_query()
-#'   left_join(db1, db2, sql_on = "LHS.x < RHS.x") |> show_query()
+#'   left_join(db1, db2) %>% show_query()
+#'   left_join(db1, db2, sql_on = "LHS.x < RHS.x") %>% show_query()
 #' @seealso [dplyr::mutate-joins] which this function wraps.
 #' @seealso [dbplyr::join.tbl_sql] which this function wraps.
 #' @seealso [dplyr::show_query]
 #' @exportS3Method dplyr::inner_join
 inner_join.tbl_sql <- function(x, y, by = NULL, ...) {
-
-  # Check arguments
-  assert_data_like(x)
-  assert_data_like(y)
-  checkmate::assert_character(by, null.ok = TRUE)
-
   .dots <- list(...)
 
   if (!"na_by" %in% names(.dots)) {
-    if (inherits(x, "tbl_dbi") || inherits(y, "tbl_dbi")) join_warn()
+    join_warn()
     return(NextMethod("inner_join"))
   }
 
+  # Check arguments
+  checkmate::assert(
+    checkmate::check_character(by, null.ok = TRUE),
+    checkmate::check_class(by, "dplyr_join_by", null.ok = TRUE)
+  )
+
   join_warn_experimental()
 
-  args <- as.list(rlang::current_env()) |>
+  args <- as.list(rlang::current_env()) %>%
     append(.dots)
 
   .renamer <- select_na_sql(x, y, by, .dots$na_by)
@@ -195,8 +195,8 @@ inner_join.tbl_sql <- function(x, y, by = NULL, ...) {
   args$na_by <- NULL
   args$sql_on <- join_na_sql(x, by, .dots$na_by)
 
-  join_result <- do.call(dplyr::inner_join, args = args) |>
-    dplyr::rename(!!.renamer) |>
+  join_result <- do.call(dplyr::inner_join, args = args) %>%
+    dplyr::rename(!!.renamer) %>%
     dplyr::select(tidyselect::all_of(names(.renamer)))
 
   return(join_result)
@@ -205,23 +205,22 @@ inner_join.tbl_sql <- function(x, y, by = NULL, ...) {
 #' @rdname joins
 #' @exportS3Method dplyr::left_join
 left_join.tbl_sql <- function(x, y, by = NULL, ...) {
-
-  # Check arguments
-  assert_data_like(x)
-  assert_data_like(y)
-  checkmate::assert_character(by, null.ok = TRUE)
-
   .dots <- list(...)
 
   if (!"na_by" %in% names(.dots)) {
-    if (inherits(x, "tbl_dbi") || inherits(y, "tbl_dbi")) join_warn()
-
+    join_warn()
     return(NextMethod("left_join"))
   }
 
+  # Check arguments
+  checkmate::assert(
+    checkmate::check_character(by, null.ok = TRUE),
+    checkmate::check_class(by, "dplyr_join_by", null.ok = TRUE)
+  )
+
   join_warn_experimental()
 
-  args <- as.list(rlang::current_env()) |>
+  args <- as.list(rlang::current_env()) %>%
     append(.dots)
 
   .renamer <- select_na_sql(x, y, by, .dots$na_by)
@@ -230,8 +229,8 @@ left_join.tbl_sql <- function(x, y, by = NULL, ...) {
   args$na_by <- NULL
   args$sql_on <- join_na_sql(x, by, .dots$na_by)
 
-  join_result <- do.call(dplyr::left_join, args = args) |>
-    dplyr::rename(!!.renamer) |>
+  join_result <- do.call(dplyr::left_join, args = args) %>%
+    dplyr::rename(!!.renamer) %>%
     dplyr::select(tidyselect::all_of(names(.renamer)))
 
   return(join_result)
@@ -240,23 +239,22 @@ left_join.tbl_sql <- function(x, y, by = NULL, ...) {
 #' @rdname joins
 #' @exportS3Method dplyr::right_join
 right_join.tbl_sql <- function(x, y, by = NULL, ...) {
-
-  # Check arguments
-  assert_data_like(x)
-  assert_data_like(y)
-  checkmate::assert_character(by, null.ok = TRUE)
-
   .dots <- list(...)
 
   if (!"na_by" %in% names(.dots)) {
-    if (inherits(x, "tbl_dbi") || inherits(y, "tbl_dbi")) join_warn()
-
+    join_warn()
     return(NextMethod("right_join"))
   }
 
+  # Check arguments
+  checkmate::assert(
+    checkmate::check_character(by, null.ok = TRUE),
+    checkmate::check_class(by, "dplyr_join_by", null.ok = TRUE)
+  )
+
   join_warn_experimental()
 
-  args <- as.list(rlang::current_env()) |>
+  args <- as.list(rlang::current_env()) %>%
     append(.dots)
 
   .renamer <- select_na_sql(x, y, by, .dots$na_by)
@@ -265,8 +263,8 @@ right_join.tbl_sql <- function(x, y, by = NULL, ...) {
   args$na_by <- NULL
   args$sql_on <- join_na_sql(x, by, .dots$na_by)
 
-  join_result <- do.call(dplyr::right_join, args = args) |>
-    dplyr::rename(!!.renamer) |>
+  join_result <- do.call(dplyr::right_join, args = args) %>%
+    dplyr::rename(!!.renamer) %>%
     dplyr::select(tidyselect::all_of(names(.renamer)))
 
   return(join_result)
@@ -276,62 +274,54 @@ right_join.tbl_sql <- function(x, y, by = NULL, ...) {
 #' @rdname joins
 #' @exportS3Method dplyr::full_join
 full_join.tbl_sql <- function(x, y, by = NULL, ...) {
-
-  # Check arguments
-  assert_data_like(x)
-  assert_data_like(y)
-  checkmate::assert_character(by, null.ok = TRUE)
-
   .dots <- list(...)
 
-  if ("na_by" %in% names(.dots)) {
-    join_warn_experimental()
-    # Full joins are hard...
-    out <- dplyr::union(dplyr::left_join(x, y, by = by, na_by = .dots$na_by),
-                        dplyr::right_join(x, y, by = by, na_by = .dots$na_by))
-    return(out)
-  } else {
-    if (inherits(x, "tbl_dbi") || inherits(y, "tbl_dbi")) join_warn()
-    return(dplyr::full_join(x, y, by = by, ...))
+  if (!"na_by" %in% names(.dots)) {
+    join_warn()
+    return(NextMethod("full_join"))
   }
+
+  # Check arguments
+  checkmate::assert(
+    checkmate::check_character(by, null.ok = TRUE),
+    checkmate::check_class(by, "dplyr_join_by", null.ok = TRUE)
+  )
+
+  join_warn_experimental()
+
+  # Full joins are hard...
+  out <- dplyr::union(
+    dplyr::left_join(x, y, by = by, na_by = .dots$na_by),
+    dplyr::right_join(x, y, by = by, na_by = .dots$na_by)
+  )
+
+  return(out)
 }
 
 
 #' @rdname joins
 #' @exportS3Method dplyr::semi_join
 semi_join.tbl_sql <- function(x, y, by = NULL, ...) {
-
-  # Check arguments
-  assert_data_like(x)
-  assert_data_like(y)
-  checkmate::assert_character(by, null.ok = TRUE)
-
   .dots <- list(...)
 
-  if ("na_by" %in% names(.dots)) {
-    stop("Not implemented")
-  } else {
-    if (inherits(x, "tbl_dbi") || inherits(y, "tbl_dbi")) join_warn()
-    return(dplyr::semi_join(x, y, by = by, ...))
+  if (!"na_by" %in% names(.dots)) {
+    join_warn()
+    return(NextMethod("semi_join"))
   }
+
+  stop("Not implemented")
 }
 
 
 #' @rdname joins
 #' @exportS3Method dplyr::anti_join
 anti_join.tbl_sql <- function(x, y, by = NULL, ...) {
-
-  # Check arguments
-  assert_data_like(x)
-  assert_data_like(y)
-  checkmate::assert_character(by, null.ok = TRUE)
-
   .dots <- list(...)
 
-  if ("na_by" %in% names(.dots)) {
-    stop("Not implemented")
-  } else {
-    if (inherits(x, "tbl_dbi") || inherits(y, "tbl_dbi")) join_warn()
-    return(dplyr::anti_join(x, y, by = by, ...))
+  if (!"na_by" %in% names(.dots)) {
+    join_warn()
+    return(NextMethod("anti_join"))
   }
+
+  stop("Not implemented")
 }
