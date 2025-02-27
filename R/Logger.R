@@ -104,16 +104,12 @@ Logger <- R6::R6Class(                                                          
       if (warn && is.null(self$log_path) && is.null(self$log_tbl)) {
         warning(
           "`log_path` and `log_tbl` are both `NULL` and therefore NO file or database logging will be done.\n",
-          "Consider adding options SCDB.log_table_id and/or SCDB.log_path to your .Rprofile"
+          "Consider adding options SCDB.log_table_id and/or SCDB.log_path to your .Rprofile",
+          call. = FALSE
         )
       }
     },
 
-    #' @description
-    #'   Remove generated `log_name` from database if not writing to a file.
-    finalize = function() {
-      self$finalize_db_entry()
-    },
 
     #' @description
     #'   Write a line to log (console / file).
@@ -161,7 +157,7 @@ Logger <- R6::R6Class(                                                          
     #' @param log_type (`character(1)`)\cr
     #'   The severity of the log message.
     log_warn = function(..., log_type = "WARNING") {
-      warning(self$log_info(..., log_type = log_type))
+      warning(self$log_info(..., log_type = log_type), call. = FALSE)
     },
 
     #' @description
@@ -171,7 +167,7 @@ Logger <- R6::R6Class(                                                          
     #' @param log_type (`character(1)`)\cr
     #'   The severity of the log message.
     log_error = function(..., log_type = "ERROR") {
-      stop(self$log_info(..., log_type = log_type))
+      stop(self$log_info(..., log_type = log_type), call. = FALSE)
     },
 
     #' @description
@@ -182,7 +178,7 @@ Logger <- R6::R6Class(                                                          
 
       # If log is finalized, throw an error to the user
       if (private$finalized) {
-        stop("Logger has already been finalized. Cannot write to database log table.")
+        stop("Logger has already been finalized. Cannot write to database log table.", call. = FALSE)
       }
 
       # Only write if we have a valid connection
@@ -193,7 +189,7 @@ Logger <- R6::R6Class(                                                          
         patch <- dplyr::copy_to(
           dest = private$log_conn,
           df = patch,
-          name = unique_table_name(),
+          name = unique_table_name("SCDB_logger_patch"),
           temporary = TRUE
         )
         defer_db_cleanup(patch) # Clean up on exit
@@ -344,7 +340,7 @@ Logger <- R6::R6Class(                                                          
       patch <- dplyr::copy_to(
         dest = private$log_conn,
         df = patch,
-        name = unique_table_name(),
+        name = unique_table_name("SCDB_logger_patch"),
         temporary = TRUE
       )
       defer_db_cleanup(patch) # Clean up on exit
@@ -359,6 +355,13 @@ Logger <- R6::R6Class(                                                          
         copy = TRUE,
         in_place = TRUE
       )
+    },
+
+
+    # @description
+    #   Remove generated `log_name` from database if not writing to a file.
+    finalize = function() {
+      self$finalize_db_entry()
     }
   ),
 
@@ -437,7 +440,7 @@ Logger <- R6::R6Class(                                                          
       )
 
       if (file.exists(file.path(self$log_path, filename))) {
-        stop(sprintf("Log file '%s' already exists!", filename))
+        stop(sprintf("Log file '%s' already exists!", filename), call. = FALSE)
       }
 
       private$.log_filename <- filename
