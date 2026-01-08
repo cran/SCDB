@@ -176,9 +176,20 @@ update_snapshot <- function(.data, conn, db_table, timestamp, filters = NULL, me
 
 
   ### Filter and compute checksums for incoming data
+  if (!is.null(filters) && !identical(dbplyr::remote_con(filters), dbplyr::remote_con(.data))) {
+    filters_src <- dplyr::copy_to(
+      dbplyr::remote_con(.data),
+      filters,
+      name = unique_table_name("SCDB_update_snapshot_filter")
+    )
+    defer_db_cleanup(filters_src)
+  } else {
+    filters_src <- filters
+  }
+
   .data <- .data %>%
     dplyr::ungroup() %>%
-    filter_keys(filters) %>%
+    filter_keys(filters_src) %>%
     dplyr::select(colnames(dplyr::select(db_table, !tidyselect::any_of(c("checksum", "from_ts", "until_ts")))))
 
   # Copy to the target connection if needed
@@ -191,6 +202,7 @@ update_snapshot <- function(.data, conn, db_table, timestamp, filters = NULL, me
   .data <- digest_to_checksum(.data, col = "checksum")
   if (!inherits(conn, "SQLiteConnection")) .data <- dplyr::compute(.data) # SQLite was computed in digest_to_checksum
   defer_db_cleanup(.data)
+  logger$log_info("Calculated checksums")
 
   ### Determine the next timestamp in the data (can be NA if none is found)
   next_timestamp <- min(
@@ -229,7 +241,9 @@ update_snapshot <- function(.data, conn, db_table, timestamp, filters = NULL, me
   slice_ts <- db_timestamp(timestamp, conn)
 
   currently_valid_checksums <- db_table %>%
-    dplyr::select("checksum")
+    dplyr::select("checksum") %>%
+    dplyr::compute()
+  defer_db_cleanup(currently_valid_checksums)
 
 
   ## Deactivation
@@ -245,7 +259,6 @@ update_snapshot <- function(.data, conn, db_table, timestamp, filters = NULL, me
     by = "checksum",
     update_values = c("until_ts" = slice_ts)
   )
-  logger$log_info("After to_remove")
 
   # Commit changes to DB
   rs_deactivate <- DBI::dbSendQuery(conn, sql_deactivate)
@@ -276,7 +289,6 @@ update_snapshot <- function(.data, conn, db_table, timestamp, filters = NULL, me
     by = c("checksum", "from_ts"),
     conflict = "ignore"
   )
-  logger$log_info("After to_add")
 
   # Commit changes to DB
   rs_insert <- DBI::dbSendQuery(conn, sql_insert)
