@@ -2,7 +2,7 @@ Package: SCDB
 Type: Package
 Title: Easily Access and Maintain Time-Based Versioned Data
         (Slowly-Changing-Dimension)
-Version: 0.5.2
+Version: 0.6.0
 Authors@R: 
 	  c(person(
             "Rasmus Skytte", "Randl\U00F8v",
@@ -45,7 +45,7 @@ Config/testthat/edition: 3
 BugReports: https://github.com/ssi-dk/SCDB/issues
 VignetteBuilder: knitr
 NeedsCompilation: no
-Packaged: 2026-01-06 13:02:15 UTC; B246705
+Packaged: 2026-01-23 14:27:46 UTC; B246705
 Author: Rasmus Skytte Randløv [aut, cre, rev] (ORCID:
     <https://orcid.org/0000-0002-5860-3838>),
   Marcus Munch Grünewald [aut] (ORCID:
@@ -57,4 +57,4 @@ Author: Rasmus Skytte Randløv [aut, cre, rev] (ORCID:
   Statens Serum Institut [cph, fnd]
 Maintainer: Rasmus Skytte Randløv <rske@ssi.dk>
 Repository: CRAN
-Date/Publication: 2026-01-08 08:41:08 UTC
+Date/Publication: 2026-01-23 16:00:23 UTC
