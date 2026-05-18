@@ -88,7 +88,7 @@ delta_export <- function(
   # Check arguments
   coll <- checkmate::makeAssertCollection()
   checkmate::assert_class(conn, "DBIConnection", add = coll)
-  assert_dbtable_like(db_table, len = 1, add = coll)
+  assert_dbtable_like(db_table, add = coll)
   assert_timestamp_like(timestamp_from, len = 1, add = coll)
   assert_timestamp_like(timestamp_until, null.ok = TRUE, len = 1, add = coll)
   checkmate::reportAssertions(coll)
@@ -223,7 +223,7 @@ delta_load <- function(
   # Check arguments
   coll <- checkmate::makeAssertCollection()
   checkmate::assert_class(conn, "DBIConnection", add = coll)
-  assert_dbtable_like(db_table, len = 1, add = coll)
+  assert_dbtable_like(db_table, add = coll)
   checkmate::assert_multi_class(logger, "Logger", null.ok = TRUE, add = coll)
   checkmate::reportAssertions(coll)
 
@@ -371,8 +371,8 @@ delta_load <- function(
           function(ts, n_insertions, n_deactivations) {
             logger$set_timestamp(ts)
             logger$log_to_db(
-              n_insertions = !!ifelse(is.na(n_insertions), 0, n_insertions),
-              n_deactivations = !!ifelse(is.na(n_deactivations), 0, n_deactivations),
+              n_insertions = !!ifelse(is.na(n_insertions), 0L, as.integer(n_insertions)),
+              n_deactivations = !!ifelse(is.na(n_deactivations), 0L, as.integer(n_deactivations)),
               message = !!glue::glue(
                 "Update via delta load (",
                 "timestamp_from = {attr(delta, \"timestamp_from\")}",

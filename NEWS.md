@@ -1,3 +1,15 @@
+# SCDB 0.6.1
+
+## Improvements and Fixes
+
+* `delta_export` and `delta_load` now accepts `db_table_id` of class `Id`
+  without error.
+
+* `delta_load` now always writes integer `n_insertions` and `n_deactivations` to the logs table (#221).
+
+* Compatibility with `dbplyr` 2.6.0 (#223, @hadley and #225).
+
+
 # SCDB 0.6.0
 
 ## Improvements and Fixes

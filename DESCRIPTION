@@ -2,7 +2,7 @@ Package: SCDB
 Type: Package
 Title: Easily Access and Maintain Time-Based Versioned Data
         (Slowly-Changing-Dimension)
-Version: 0.6.0
+Version: 0.6.1
 Authors@R: 
 	  c(person(
             "Rasmus Skytte", "Randl\U00F8v",
@@ -30,9 +30,8 @@ Description: A collection of functions that enable easy access and updating of a
              For reference see Ralph Kimball and Margy Ross (2013, ISBN 9781118530801).
 License: GPL-3
 Encoding: UTF-8
-RoxygenNote: 7.3.3
 Depends: R (>= 3.6.0)
-Imports: checkmate, DBI, dbplyr (>= 2.4.0), dplyr, glue, lubridate,
+Imports: checkmate, DBI, dbplyr (>= 2.5.0), dplyr, glue, lubridate,
         methods, openssl, parallelly, purrr, rlang, R6, stringr, tidyr,
         tidyselect, utils, magrittr
 Suggests: callr, conflicted, devtools, duckdb (>= 0.10.1), ggplot2,
@@ -44,8 +43,9 @@ URL: https://github.com/ssi-dk/SCDB, https://ssi-dk.github.io/SCDB/
 Config/testthat/edition: 3
 BugReports: https://github.com/ssi-dk/SCDB/issues
 VignetteBuilder: knitr
+Config/roxygen2/version: 8.0.0
 NeedsCompilation: no
-Packaged: 2026-01-23 14:27:46 UTC; B246705
+Packaged: 2026-05-18 08:18:53 UTC; B246705
 Author: Rasmus Skytte Randløv [aut, cre, rev] (ORCID:
     <https://orcid.org/0000-0002-5860-3838>),
   Marcus Munch Grünewald [aut] (ORCID:
@@ -57,4 +57,4 @@ Author: Rasmus Skytte Randløv [aut, cre, rev] (ORCID:
   Statens Serum Institut [cph, fnd]
 Maintainer: Rasmus Skytte Randløv <rske@ssi.dk>
 Repository: CRAN
-Date/Publication: 2026-01-23 16:00:23 UTC
+Date/Publication: 2026-05-18 09:00:02 UTC

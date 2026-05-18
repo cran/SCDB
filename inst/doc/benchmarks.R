@@ -29,7 +29,7 @@ if (simple_rendering) {
   )
 }
 
-## ----benchmark_preprocessing, echo = FALSE, eval = requireNamespace("here")----
+## ----benchmark_preprocessing, echo = FALSE, eval = rlang::is_installed("here")----
 benchmark_location <- c(
   system.file("extdata", "benchmarks.rds", package = "SCDB"),
   here::here("inst", "extdata", "benchmarks.rds")
@@ -80,7 +80,7 @@ mean_sd <- function(x) {
   data.frame(y = mu, ymin = mu - sd, ymax = mu + sd)
 }
 
-## ----benchmark_1, echo = FALSE, eval = requireNamespace("here")---------------
+## ----benchmark_1, echo = FALSE, eval = rlang::is_installed("here")------------
 # Use data for benchmark 1
 benchmark_1 <- benchmarks %>%
   dplyr::filter(
@@ -132,7 +132,7 @@ if (simple_rendering) {
 
 g
 
-## ----benchmark_2, echo = FALSE, eval = requireNamespace("here")---------------
+## ----benchmark_2, echo = FALSE, eval = rlang::is_installed("here")------------
 # Use data for benchmark 2
 benchmark_2 <- benchmarks %>%
   dplyr::filter(
