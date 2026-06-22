@@ -2,15 +2,16 @@ Package: SCDB
 Type: Package
 Title: Easily Access and Maintain Time-Based Versioned Data
         (Slowly-Changing-Dimension)
-Version: 0.6.1
+Version: 0.6.2
 Authors@R: 
-	  c(person(
+    c(
+        person(
             "Rasmus Skytte", "Randl\U00F8v",
             email = "rske@ssi.dk",
             role = c("aut", "cre", "rev"),
             comment = c(ORCID = "0000-0002-5860-3838")
         ),
-	    person(
+        person(
             "Marcus Munch", "Gr\U00FCnewald",
             role = "aut",
             comment = c(ORCID = "0009-0006-8090-406X")
@@ -23,15 +24,17 @@ Authors@R:
         ),
         person("Sofia Myrup", "Otero", , "smot@ssi.dk", role = "rev"),
         person("Kim Daniel", "Jacobsen", role = "ctb"),
-	    person("Statens Serum Institut", role = c("cph", "fnd")))
-Description: A collection of functions that enable easy access and updating of a database of data over time.
-             More specifically, the package facilitates type-2 history for data-warehouses and provides a number
-             of Quality of life improvements for working on SQL databases with R.
-             For reference see Ralph Kimball and Margy Ross (2013, ISBN 9781118530801).
+        person("Statens Serum Institut", role = c("cph", "fnd"))
+    )
+Description: 
+    A collection of functions that enable easy access and updating of a database of data over time.
+    More specifically, the package facilitates type-2 history for data-warehouses and provides a number
+    of Quality of life improvements for working on SQL databases with R.
+    For reference see Ralph Kimball and Margy Ross (2013, ISBN 9781118530801).
 License: GPL-3
 Encoding: UTF-8
-Depends: R (>= 3.6.0)
-Imports: checkmate, DBI, dbplyr (>= 2.5.0), dplyr, glue, lubridate,
+Depends: R (>= 4.2.0)
+Imports: checkmate, DBI, dbplyr (>= 2.6.0), dplyr, glue, lubridate,
         methods, openssl, parallelly, purrr, rlang, R6, stringr, tidyr,
         tidyselect, utils, magrittr
 Suggests: callr, conflicted, devtools, duckdb (>= 0.10.1), ggplot2,
@@ -45,7 +48,7 @@ BugReports: https://github.com/ssi-dk/SCDB/issues
 VignetteBuilder: knitr
 Config/roxygen2/version: 8.0.0
 NeedsCompilation: no
-Packaged: 2026-05-18 08:18:53 UTC; B246705
+Packaged: 2026-06-22 12:05:28 UTC; B246705
 Author: Rasmus Skytte Randløv [aut, cre, rev] (ORCID:
     <https://orcid.org/0000-0002-5860-3838>),
   Marcus Munch Grünewald [aut] (ORCID:
@@ -57,4 +60,4 @@ Author: Rasmus Skytte Randløv [aut, cre, rev] (ORCID:
   Statens Serum Institut [cph, fnd]
 Maintainer: Rasmus Skytte Randløv <rske@ssi.dk>
 Repository: CRAN
-Date/Publication: 2026-05-18 09:00:02 UTC
+Date/Publication: 2026-06-22 13:20:07 UTC

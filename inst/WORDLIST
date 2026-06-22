@@ -24,10 +24,12 @@ cccc
 ccccc
 ccccccc
 cccccccc
+cadlag
 catalog
 cetera
 cdot
 cdots
+circ
 classname
 cloneable
 CMD
@@ -58,6 +60,7 @@ dfoptim
 dI
 Diekmann
 diseasy
+Diseasy's
 diseasystore
 DiseasystoreBase
 DiseasystoreGoogleCovid
@@ -70,6 +73,8 @@ DiseasyModelG
 DiseasyModelOde
 DiseasyModelRegression
 DiseasyObservables
+DiseasyPopulation
+DiseasyRegions
 DiseasySeason
 DiseasyVariant
 dk
@@ -115,6 +120,7 @@ hline
 hypoexponential
 
 IANA
+IDB
 ij
 ILI
 io
@@ -181,6 +187,7 @@ PascalCase
 pcbi
 pgpass
 pid
+pjangrp
 Plesner
 PLoS
 pnr
@@ -219,6 +226,7 @@ sigmoidal
 sim
 simulist
 Skytte
+ssi
 SSI
 Statens
 subplex

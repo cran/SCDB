@@ -374,8 +374,8 @@ columns: row names converted to a column <code>car</code>, and
 <span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>conn_secondary <span class="ot">&lt;-</span> <span class="fu">get_connection</span>(...)</span></code></pre></div>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>example_data <span class="ot">&lt;-</span> dplyr<span class="sc">::</span><span class="fu">tbl</span>(conn_primary, DBI<span class="sc">::</span><span class="fu">Id</span>(<span class="at">table =</span> <span class="st">&quot;example_data&quot;</span>))</span>
 <span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>example_data</span>
-<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="co">#&gt; # Source:   table&lt;example_data&gt; [?? x 2]</span></span>
-<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co">#&gt; # Database: DuckDB 1.5.0 [B246705@Windows 10 x64:R 4.5.1/:memory:]</span></span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="co">#&gt; # A query:  ?? x 2</span></span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a><span class="co">#&gt; # Database: DuckDB 1.5.2 [B246705@Windows 10 x64:R 4.6.0/:memory:]</span></span>
 <span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a><span class="co">#&gt;    car                  hp</span></span>
 <span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a><span class="co">#&gt;    &lt;chr&gt;             &lt;dbl&gt;</span></span>
 <span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a><span class="co">#&gt;  1 Mazda RX4           110</span></span>
@@ -419,8 +419,8 @@ example data. We then store this data in the database using
 <code>vignette(&quot;SCDB&quot;)</code> for details on
 <code>get_table()</code>):</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a><span class="fu">get_table</span>(conn_primary, <span class="st">&quot;mtcars&quot;</span>, <span class="at">slice_ts =</span> <span class="cn">NULL</span>)</span>
-<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="co">#&gt; # Source:   table&lt;memory.main.mtcars&gt; [?? x 5]</span></span>
-<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="co">#&gt; # Database: DuckDB 1.5.0 [B246705@Windows 10 x64:R 4.5.1/:memory:]</span></span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="co">#&gt; # A query:  ?? x 5</span></span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="co">#&gt; # Database: DuckDB 1.5.2 [B246705@Windows 10 x64:R 4.6.0/:memory:]</span></span>
 <span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="co">#&gt;   car                  hp checksum       from_ts             until_ts</span></span>
 <span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;             &lt;dbl&gt; &lt;chr&gt;          &lt;dttm&gt;              &lt;dttm&gt;  </span></span>
 <span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="co">#&gt; 1 Mazda RX4           110 7cbe488757cc8… 2020-01-01 11:00:00 NA      </span></span>
@@ -437,8 +437,8 @@ export the changes in the form of a single “delta”.</p>
 <span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>)</span>
 <span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a></span>
 <span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>delta_1</span>
-<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="co">#&gt; # Source:   table&lt;SCDB_delta_wYmXtEctRI&gt; [?? x 5]</span></span>
-<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="co">#&gt; # Database: DuckDB 1.5.0 [B246705@Windows 10 x64:R 4.5.1/:memory:]</span></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a><span class="co">#&gt; # A query:  ?? x 5</span></span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a><span class="co">#&gt; # Database: DuckDB 1.5.2 [B246705@Windows 10 x64:R 4.6.0/:memory:]</span></span>
 <span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a><span class="co">#&gt;   car                  hp checksum       from_ts             until_ts</span></span>
 <span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;             &lt;dbl&gt; &lt;chr&gt;          &lt;dttm&gt;              &lt;dttm&gt;  </span></span>
 <span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a><span class="co">#&gt; 1 Mazda RX4           110 7cbe488757cc8… 2020-01-01 11:00:00 NA      </span></span>
@@ -457,8 +457,8 @@ secondary database. Notice that we do not need to create the table as
 <span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a><span class="co">#&gt; NULL</span></span>
 <span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a></span>
 <span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a><span class="fu">get_table</span>(conn_secondary, <span class="st">&quot;mtcars_firewalled&quot;</span>, <span class="at">slice_ts =</span> <span class="cn">NULL</span>)</span>
-<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="co">#&gt; # Source:   table&lt;memory.main.mtcars_firewalled&gt; [?? x 5]</span></span>
-<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="co">#&gt; # Database: DuckDB 1.5.0 [B246705@Windows 10 x64:R 4.5.1/:memory:]</span></span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a><span class="co">#&gt; # A query:  ?? x 5</span></span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a><span class="co">#&gt; # Database: DuckDB 1.5.2 [B246705@Windows 10 x64:R 4.6.0/:memory:]</span></span>
 <span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a><span class="co">#&gt;   car                  hp checksum       from_ts             until_ts</span></span>
 <span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;             &lt;dbl&gt; &lt;chr&gt;          &lt;dttm&gt;              &lt;dttm&gt;  </span></span>
 <span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a><span class="co">#&gt; 1 Mazda RX4           110 7cbe488757cc8… 2020-01-01 11:00:00 NA      </span></span>
@@ -492,8 +492,8 @@ above alterations.</p>
 <span id="cb10-10"><a href="#cb10-10" tabindex="-1"></a><span class="co">#&gt; NULL</span></span></code></pre></div>
 <p>Which brings us to the following state:</p>
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="fu">get_table</span>(conn_primary, <span class="st">&quot;mtcars&quot;</span>, <span class="at">slice_ts =</span> <span class="cn">NULL</span>)</span>
-<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="co">#&gt; # Source:   table&lt;memory.main.mtcars&gt; [?? x 5]</span></span>
-<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a><span class="co">#&gt; # Database: DuckDB 1.5.0 [B246705@Windows 10 x64:R 4.5.1/:memory:]</span></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="co">#&gt; # A query:  ?? x 5</span></span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a><span class="co">#&gt; # Database: DuckDB 1.5.2 [B246705@Windows 10 x64:R 4.6.0/:memory:]</span></span>
 <span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="co">#&gt;   car                  hp checksum       from_ts             until_ts           </span></span>
 <span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;             &lt;dbl&gt; &lt;chr&gt;          &lt;dttm&gt;              &lt;dttm&gt;             </span></span>
 <span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a><span class="co">#&gt; 1 Mazda RX4           110 7cbe488757cc8… 2020-01-01 11:00:00 2020-01-03 13:00:00</span></span>
@@ -513,8 +513,8 @@ database.</p>
 <span id="cb12-5"><a href="#cb12-5" tabindex="-1"></a>)</span>
 <span id="cb12-6"><a href="#cb12-6" tabindex="-1"></a></span>
 <span id="cb12-7"><a href="#cb12-7" tabindex="-1"></a>delta_2</span>
-<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a><span class="co">#&gt; # Source:   table&lt;SCDB_delta_MVNAt8vWKM&gt; [?? x 5]</span></span>
-<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a><span class="co">#&gt; # Database: DuckDB 1.5.0 [B246705@Windows 10 x64:R 4.5.1/:memory:]</span></span>
+<span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a><span class="co">#&gt; # A query:  ?? x 5</span></span>
+<span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a><span class="co">#&gt; # Database: DuckDB 1.5.2 [B246705@Windows 10 x64:R 4.6.0/:memory:]</span></span>
 <span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a><span class="co">#&gt;   car           hp checksum              from_ts             until_ts           </span></span>
 <span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;      &lt;dbl&gt; &lt;chr&gt;                 &lt;dttm&gt;              &lt;dttm&gt;             </span></span>
 <span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a><span class="co">#&gt; 1 Mazda RX4    110 7cbe488757cc85aab658… 2020-01-01 11:00:00 2020-01-03 13:00:00</span></span>
@@ -531,8 +531,8 @@ secondary database.</p>
 <span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a><span class="co">#&gt; NULL</span></span>
 <span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a></span>
 <span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a><span class="fu">get_table</span>(conn_secondary, <span class="st">&quot;mtcars_firewalled&quot;</span>, <span class="at">slice_ts =</span> <span class="cn">NULL</span>)</span>
-<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a><span class="co">#&gt; # Source:   table&lt;memory.main.mtcars_firewalled&gt; [?? x 5]</span></span>
-<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a><span class="co">#&gt; # Database: DuckDB 1.5.0 [B246705@Windows 10 x64:R 4.5.1/:memory:]</span></span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a><span class="co">#&gt; # A query:  ?? x 5</span></span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a><span class="co">#&gt; # Database: DuckDB 1.5.2 [B246705@Windows 10 x64:R 4.6.0/:memory:]</span></span>
 <span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a><span class="co">#&gt;   car                  hp checksum       from_ts             until_ts           </span></span>
 <span id="cb13-12"><a href="#cb13-12" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;             &lt;dbl&gt; &lt;chr&gt;          &lt;dttm&gt;              &lt;dttm&gt;             </span></span>
 <span id="cb13-13"><a href="#cb13-13" tabindex="-1"></a><span class="co">#&gt; 1 Mazda RX4           110 7cbe488757cc8… 2020-01-01 11:00:00 2020-01-03 13:00:00</span></span>
@@ -577,8 +577,8 @@ secondary database.</p>
 <span id="cb15-6"><a href="#cb15-6" tabindex="-1"></a><span class="co">#&gt; NULL</span></span>
 <span id="cb15-7"><a href="#cb15-7" tabindex="-1"></a></span>
 <span id="cb15-8"><a href="#cb15-8" tabindex="-1"></a><span class="fu">get_table</span>(conn_secondary, <span class="st">&quot;mtcars_batch&quot;</span>, <span class="at">slice_ts =</span> <span class="cn">NULL</span>)</span>
-<span id="cb15-9"><a href="#cb15-9" tabindex="-1"></a><span class="co">#&gt; # Source:   table&lt;memory.main.mtcars_batch&gt; [?? x 5]</span></span>
-<span id="cb15-10"><a href="#cb15-10" tabindex="-1"></a><span class="co">#&gt; # Database: DuckDB 1.5.0 [B246705@Windows 10 x64:R 4.5.1/:memory:]</span></span>
+<span id="cb15-9"><a href="#cb15-9" tabindex="-1"></a><span class="co">#&gt; # A query:  ?? x 5</span></span>
+<span id="cb15-10"><a href="#cb15-10" tabindex="-1"></a><span class="co">#&gt; # Database: DuckDB 1.5.2 [B246705@Windows 10 x64:R 4.6.0/:memory:]</span></span>
 <span id="cb15-11"><a href="#cb15-11" tabindex="-1"></a><span class="co">#&gt;   car                  hp checksum       from_ts             until_ts           </span></span>
 <span id="cb15-12"><a href="#cb15-12" tabindex="-1"></a><span class="co">#&gt;   &lt;chr&gt;             &lt;dbl&gt; &lt;chr&gt;          &lt;dttm&gt;              &lt;dttm&gt;             </span></span>
 <span id="cb15-13"><a href="#cb15-13" tabindex="-1"></a><span class="co">#&gt; 1 Mazda RX4           110 7cbe488757cc8… 2020-01-01 11:00:00 2020-01-03 13:00:00</span></span>
